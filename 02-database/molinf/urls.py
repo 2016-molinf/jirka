@@ -2,7 +2,7 @@ import moldb.views
 
 """molinf URL Configuration
 
-The `urlpatterns` list routes URLs to views. For more information please see:
+The `urlpatterns` list_molecules routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/1.9/topics/http/urls/
 Examples:
 Function views
@@ -22,7 +22,7 @@ urlpatterns = [
     #url(r'^admin/', admin.site.urls),
     url(r'^$', moldb.views.home, name='home'),
     url(r'^add-molecule$', moldb.views.add_molecule, name='add_molecule'),
-    url(r'^list$', moldb.views.list, name='list'),
+    url(r'^list-molecules$', moldb.views.list_molecules, name='list_molecules'),
 
     # API
     url(r'^api/molConverter$', moldb.views.api_molConverter, name='api_molConverter'),

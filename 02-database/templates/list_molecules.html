@@ -1,0 +1,25 @@
+{% extends '_layout.html' %}
+
+{% block title %}List molecules{% endblock %}
+
+{% block content %}
+    {% for mol in mols %}
+        {{ mol.sum_formula }}<br />
+    {% endfor %}
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if mols.has_previous %}
+                <a href="?page={{ mols.previous_page_number }}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ mols.number }} of {{ mols.paginator.num_pages }}.
+            </span>
+
+            {% if mols.has_next %}
+                <a href="?page={{ mols.next_page_number }}">next</a>
+            {% endif %}
+        </span>
+    </div>
+{% endblock %}

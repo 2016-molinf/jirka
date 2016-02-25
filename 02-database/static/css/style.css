@@ -24,6 +24,11 @@ body {
     font-weight: bold;
 }
 
+#div-content {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
 a {
     color: black;
     border-bottom: 1px dotted black;
