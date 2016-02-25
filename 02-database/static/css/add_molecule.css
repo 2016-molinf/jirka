@@ -70,3 +70,8 @@ button[disabled] {
 #input-smiles:hover {
     cursor: text;
 }
+
+molid {
+    font-style: italic;
+    color: #005bc3;
+}
