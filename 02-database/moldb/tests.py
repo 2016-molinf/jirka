@@ -1,6 +1,7 @@
 from django.test import TestCase
 from .models import Molecule
 import json
+from rdkit.Chem import AllChem
 
 class AddMoleculeTestCase(TestCase):
     def setUp(self):
@@ -29,6 +30,16 @@ M  END"""
     def test_add_api(self):
         response = self.client.post(path="/api/addMolecule", data={"molfile": self.propane})
         self.assertEqual(response.status_code, 200)
+
+        mol = AllChem.MolFromMolBlock(self.propane)
+        mol_added = Molecule.objects.last()
+
+        self.assertEqual(float("{0:.2f}".format(AllChem.CalcExactMolWt(mol))), mol_added.mw)
+        self.assertEqual(AllChem.MolToSmiles(mol), mol_added.smiles)
+        self.assertEqual(AllChem.CalcMolFormula(mol), mol_added.sum_formula)
+        inchi = AllChem.MolToInchi(mol)
+        self.assertEqual(inchi, mol_added.inchi)
+        self.assertEqual(AllChem.InchiToInchiKey(inchi), mol_added.inchi_key)
 
     def test_converter_api(self):
         response = self.client.post(path="/api/molConverter", data={"data": self.propane,
