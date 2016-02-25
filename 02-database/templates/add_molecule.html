@@ -1,0 +1,121 @@
+{% extends '_layout.html' %}
+{% load staticfiles %}
+
+{% block staticfiles %}
+    {{ block.super }}
+    <script src="{% static "js/ChemDoodleWeb.js" %}"></script>
+    <script src="{% static "js/ChemDoodleWeb-uis.js" %}"></script>
+    <script src="{% static "js/csrf.js" %}"></script>
+
+    <link href="{% static "css/ChemDoodleWeb.css" %}" rel="stylesheet" type="text/css">
+    <link href="{% static "css/jquery-ui-1.10.3.custom.css" %}" rel="stylesheet" type="text/css">
+    <link href="{% static "css/add_molecule.css" %}" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block title %}Add molecule{% endblock %}
+
+{% block content %}
+    <h2>Add molecule</h2>
+
+    <div id="div-form">
+        {% comment %}
+        <form id="form-add_molecule" method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+        </form>
+
+        <div id="div-arrows">
+            <arrow>&uarr;</arrow><arrow>&darr;</arrow>
+        </div>
+        {% endcomment %}
+        <div id="div-chemdoodle">
+            <canvas id="canvas-chemdoodle"></canvas>
+        </div>
+
+        <input id="input-smiles" type="text" readonly="readonly" />
+
+        <div id="div-buttons">
+            <button id="button-add" type="submit" form="form-add_molecule">Add</button>
+            <!--<button id="button-reset" type="reset" form="form-add_molecule">Reset</button>-->
+            <button id="button-smiles" type="button" form="form-add_molecule">Show SMILES</button>
+        </div>
+    </div>
+
+    <div id="div-info"></div>
+
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        var sketcher = new ChemDoodle.SketcherCanvas('canvas-chemdoodle', 500, 300, {useServices: true, oneMolecule: true});
+        var csrftoken = getCookie('csrftoken');
+
+        function toggleLoad(mode)
+        {
+            if (mode)
+            {
+                $("#div-info").html("<div id='div-loader'><img src='{% static 'image/gear.gif' %}' alt='Loading...' /></div>");
+                $("#div-buttons #button-add").prop('disabled', true);
+            }
+            else
+            {
+                $("#div-info #div-loader").remove();
+                $("#div-buttons #button-add").prop('disabled', false);
+            }
+        }
+
+        $("#button-add").click(function()
+        {
+            toggleLoad(true);
+
+            var molfile = ChemDoodle.writeMOL(sketcher.getMolecule());
+
+            if (molfile != "")
+            {
+                $.ajax({
+                    url: "/api/addMolecule",
+                    method: "POST",
+                    data: {molfile: ChemDoodle.writeMOL(sketcher.getMolecule())},
+                    success: function(result)
+                    {
+                        if (result.success)
+                        {
+                            $("#button-smiles").click();
+                            $("#div-info").html("<p class='success'>Molecule has been successfuly added with ID: <i>" + result.data + "</i></p>");
+                        }
+                        else
+                        {
+                            $("#div-info").html("<p class='error'>" + result.error + "</p>");
+                        }
+                    }
+                });
+            }
+            else
+            {
+                $("#div-info").html("<p class='error'>Cannot add empty molecule!</p>");
+            }
+
+            toggleLoad(false);
+        });
+
+        $("#button-smiles").click(function()
+        {
+            $.ajax({
+                url: "/api/molConverter",
+                method: "POST",
+                data: {data: ChemDoodle.writeMOL(sketcher.getMolecule()), format_from: "molfile", format_to: "smiles"},
+                success: function(result)
+                {
+                    if (result.success)
+                    {
+                        $("#input-smiles").val(result.data);
+                    }
+                    else
+                    {
+                        $("#input-smiles").val(result.error);
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}

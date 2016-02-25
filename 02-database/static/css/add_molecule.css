@@ -1,0 +1,72 @@
+#div-form {
+    display: inline;
+}
+
+#div-chemdoodle {
+    display: inline;
+}
+
+#div-choosing {
+    float: left;
+    margin-left: 20%;
+}
+
+#div-buttons {
+    display: block;
+    margin-top: 10px;
+}
+
+#div-buttons button {
+    display: inline;
+}
+
+arrow {
+    display: inline;
+    font-size: 50px;
+}
+
+arrow:hover {
+    color: #35c308;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+input[type="text"] {
+    width: 80%;
+}
+
+p.error {
+    color: red;
+    font-weight: bold;
+}
+
+p.success {
+    color: #35c308;
+    font-weight: bold;
+}
+
+#div-loader {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20px;
+}
+
+button[disabled] {
+    cursor: not-allowed;
+}
+
+#input-smiles {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 50%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    border: 0;
+}
+
+#input-smiles:hover {
+    cursor: text;
+}
