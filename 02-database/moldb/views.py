@@ -32,7 +32,6 @@ def api_molConverter(request):
             mol = Chem.MolFromSmiles(data)
         else:
             return addMoleculeJsonResponse(False, error="input format unknown")
-            #return JsonResponse({"success": False, "error": "input format unknown"})
 
         if mol:
             if format_to == "molfile":
@@ -41,14 +40,11 @@ def api_molConverter(request):
                 output = Chem.MolToSmiles(mol)
             else:
                 return addMoleculeJsonResponse(False, error="Input format unknown.")
-                #return JsonResponse({"success": False, "error": "Input format unknown."})
 
             if output:
                 return addMoleculeJsonResponse(True, data=output)
-                #return JsonResponse({"success": True, "data": output})
         else:
             return addMoleculeJsonResponse(False, error="Cannot convert from '{}' to '{}': probably invalid data supplied.".format(format_from, format_to))
-            #return JsonResponse({"success": False, "error": "Cannot convert from '{}' to '{}': probably invalid data supplied.".format(format_from, format_to)})
 
 def api_addMolecule(request):
     if request.POST and request.POST["molfile"]:
@@ -61,13 +57,9 @@ def api_addMolecule(request):
                 mol.save(molfile=request.POST["molfile"])
             except models.Molecule.MoleculeExistsInDatabase:
                 return addMoleculeJsonResponse(False, error="Cannot add the molecule: it already exists in database.")
-                #return JsonResponse({"success": False, "error": "Cannot add the molecule: it already exists in database."})
             except models.Molecule.MoleculeCreationError:
                 return addMoleculeJsonResponse(False, error="Cannot add the molecule: check your structure (valence etc.).")
-                #return JsonResponse({"success": False, "error": "Cannot add the molecule: check your structure (valence etc.)."})
 
-            return addMoleculeJsonResponse(True, data=mol.internal_id)
-            #return JsonResponse({"success": True, "data": mol.internal_id})
+            return addMoleculeJsonResponse(True, data=mol.internal_id, smiles=mol.smiles)
         else:
             return addMoleculeJsonResponse(False, error="Cannot add empty molecule.")
-            #return JsonResponse({"success": False, "error": "Cannot add empty molecule."})
