@@ -80,8 +80,8 @@
                     {
                         if (result.success)
                         {
-                            $("#button-smiles").click();
-                            $("#div-info").html("<p class='success'>Molecule has been successfuly added with ID: <i>" + result.data + "</i></p>");
+                            $("#input-smiles").val(result.smiles);
+                            $("#div-info").html("<p class='success'>Molecule has been successfuly added with ID: <molid>" + result.data + "</molid></p>");
                         }
                         else
                         {
