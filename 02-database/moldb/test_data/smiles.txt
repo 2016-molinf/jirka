@@ -4,3 +4,5 @@ C(O)C
 CC=O
 BrCC(O)O
 C#C=C
+F-F
+POC#CCc1ccccc1
