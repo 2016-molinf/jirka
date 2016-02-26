@@ -38,7 +38,7 @@ class Molecule(models.Model):
                 self.smiles = smiles
 
                 try:
-                    last_id = Molecule.objects.latest('id').id
+                    last_id = Molecule.objects.latest('id').id + 1
                 except ObjectDoesNotExist:
                     last_id = 1
 
@@ -50,7 +50,7 @@ class Molecule(models.Model):
                 if not binMol.GetNumConformers():
                     rdDepictor.Compute2DCoords(mol)
 
-                drawer = rdMolDraw2D.MolDraw2DSVG(250, 250)
+                drawer = rdMolDraw2D.MolDraw2DSVG(100, 100)
                 drawer.DrawMolecule(mol)
                 drawer.FinishDrawing()
                 svg = drawer.GetDrawingText().replace('svg:', '')
