@@ -17,27 +17,39 @@
 {% block content %}
     <h2>Add molecule</h2>
 
-    <div id="div-form">
-        {% comment %}
-        <form id="form-add_molecule" method="POST">
-            {% csrf_token %}
-            {{ form.as_p }}
-        </form>
-
-        <div id="div-arrows">
-            <arrow>&uarr;</arrow><arrow>&darr;</arrow>
-        </div>
-        {% endcomment %}
+    <div id="div-adding-wrapper">
         <div id="div-chemdoodle">
+            {% comment %}
+            <form id="form-add_molecule" method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+            </form>
+
+            <div id="div-arrows">
+                <arrow>&uarr;</arrow><arrow>&darr;</arrow>
+            </div>
+            {% endcomment %}
+
+            <p>You can draw structure:</p>
+
             <canvas id="canvas-chemdoodle"></canvas>
+
+            <input id="input-smiles" type="text" readonly="readonly" />
+
+            <div id="div-buttons">
+                <button id="button-add" type="submit">Add</button>
+                <!--<button id="button-reset" type="reset">Reset</button>-->
+                <button id="button-smiles" type="button">Show SMILES</button>
+            </div>
         </div>
 
-        <input id="input-smiles" type="text" readonly="readonly" />
-
-        <div id="div-buttons">
-            <button id="button-add" type="submit" form="form-add_molecule">Add</button>
-            <!--<button id="button-reset" type="reset" form="form-add_molecule">Reset</button>-->
-            <button id="button-smiles" type="button" form="form-add_molecule">Show SMILES</button>
+        <div id="div-import">
+            <p>You can import file containing molecules (currently supports SMILES, one per line):</p>
+            <form action="/api/uploadMolecules" method="post" id="form-import" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input id="input-file" type="file" />
+                <button id="button-import" type="submit">Import</button>
+            </form>
         </div>
     </div>
 
@@ -64,6 +76,53 @@
             }
         }
 
+        function showInfo(result)
+        {
+            console.log(result);
+
+            $("#div-info").html(`
+                <table id="table-info" cellpadding="10">
+                    <thead>
+                        <tr>
+                            <th>SMILES</th>
+                            <th>success</th>
+                            <th>error</th>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            `);
+
+            $.each(result, function()
+            {
+                if (this.success)
+                {
+                    var tr_class = "success";
+                }
+                else
+                {
+                    var tr_class = "error";
+                }
+
+                if (this.error)
+                {
+                    var error = this.error;
+                }
+                else
+                {
+                    var error = "";
+                }
+
+                $("#table-info tbody").append(`
+                    <tr class="{0}">
+                        <td style="text-align: left;">{1}</td>
+                        <td>{2}</td>
+                        <td>{3}</td>
+                    </tr>
+               `.format(tr_class, this.smiles, this.success, error));
+            });
+        }
+
         $("#button-add").click(function()
         {
             toggleLoad(true);
@@ -78,15 +137,12 @@
                     data: {molfile: ChemDoodle.writeMOL(sketcher.getMolecule())},
                     success: function(result)
                     {
-                        if (result.success)
+                        if (result[0].smiles)
                         {
-                            $("#input-smiles").val(result.smiles);
-                            $("#div-info").html("<p class='success'>Molecule has been successfuly added with ID: <molid>" + result.data + "</molid></p>");
+                            $("#input-smiles").val(result[0].smiles);
                         }
-                        else
-                        {
-                            $("#div-info").html("<p class='error'>" + result.error + "</p>");
-                        }
+
+                        showInfo(result);
                     }
                 });
             }
@@ -114,6 +170,26 @@
                     {
                         $("#input-smiles").val(result.error);
                     }
+                }
+            });
+        });
+
+        $('#form-import').submit(function(e)
+        {
+            e.preventDefault();
+            var fd = new FormData();
+            fd.append('file', $('#input-file')[0].files[0]);
+
+            $.ajax({
+                url: '/api/uploadMolecules',
+                type: 'POST',
+                data: fd,
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function(result)
+                {
+                    showInfo(result);
                 }
             });
         });
