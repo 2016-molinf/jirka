@@ -4,14 +4,15 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="chrome=1">
+        {# <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> #}
+        {# <meta http-equiv="X-UA-Compatible" content="chrome=1"> #}
 
         <title>{% block title %}{% endblock %} @ MolDB</title>
 
         {% block staticfiles %}
             <link href="{% static "css/style.css" %}" rel="stylesheet" type="text/css">
             <script src="{% static "js/jquery-min.js" %}"></script>
+            <script src="{% static "js/stringFormat.js" %}"></script>
         {% endblock %}
     </head>
     <body>
