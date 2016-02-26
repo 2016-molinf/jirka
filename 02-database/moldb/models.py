@@ -25,11 +25,15 @@ class Molecule(models.Model):
     def __str__(self):
         return "Molecule ({id}): '{name}', formula: '{formula}'".format(id=self.internal_id, name=self.name, formula=self.sum_formula)
 
-    def save(self, molfile, *args, **kwargs):
-        mol = Chem.MolFromMolBlock(molfile)
+    def save(self, smiles=None, molfile=None, *args, **kwargs):
+        if molfile:
+            mol = Chem.MolFromMolBlock(molfile)
+        elif smiles:
+            mol = Chem.MolFromSmiles(smiles)
 
         if mol:
             smiles = Chem.MolToSmiles(mol)
+
             if smiles and Molecule.objects.filter(smiles=smiles).count() == 0 and len(smiles) > 1:
                 self.smiles = smiles
 
@@ -61,12 +65,14 @@ class Molecule(models.Model):
 
                 super(Molecule, self).save(*args, **kwargs)
             else:
-                raise self.MoleculeExistsInDatabase
+                raise self.MoleculeExistsInDatabase(smiles)
         else:
             raise self.MoleculeCreationError
 
     class MoleculeExistsInDatabase(Exception):
-        pass
+        def __init__(self, smiles):
+            super(Exception, self).__init__(smiles)
+            self.smiles = smiles
 
     class MoleculeCreationError(Exception):
         pass
