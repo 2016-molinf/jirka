@@ -1,38 +1,54 @@
 {% extends '_layout.html' %}
+{% load staticfiles %}
+
+{% block staticfiles %}
+    {{ block.super }}
+    <script src="{% static "js/jquery.fileDownload.js" %}"></script>
+
+    <link href="{% static "css/list_molecules.css" %}" rel="stylesheet" type="text/css">
+{% endblock %}
 
 {% block title %}List molecules{% endblock %}
 
 {% block content %}
-    <table id="table-mols">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Added</th>
-                <th>Sum formula</th>
-                <th>SMILES</th>
-                <th>InCHi</th>
-                <th>Structure</th>
-            </tr>
-        </thead>
-        <tbody>
+    <h2>List molecules</h2>
 
-            {% for mol in mols %}
-                <tr>
-                    <td>{{ mol.internal_id }}</td>
-                    <td>{{ mol.created }}</td>
-                    <td>{{ mol.sum_formula }}</td>
-                    <td>{{ mol.smiles }}</td>
-                    <td>{{ mol.inchi }}</td>
-                    <td>
-                        {{ mol.image }}
-                    </td>
+    <div id="div-table">
+        <table id="table-mols">
+            <thead>
+                <tr class="mols">
+                    <th class="mols-select"><input id="input-select-all" type="checkbox" /></th>
+                    <th class="mols-id">ID</th>
+                    <th>Added</th>
+                    <th>Sum formula</th>
+                    <th>SMILES</th>
+                    <th>InCHi</th>
+                    <th class="mols-image">Structure</th>
                 </tr>
-            {% endfor %}
+            </thead>
+            <tbody>
 
-        </tbody>
-    </table>
+                {% for mol in mols %}
+                    <tr class="mols">
+                        <td class="mols-select"><input type="checkbox" value="{{ mol.id }}" /></td>
+                        <td class="mols-id">{{ mol.internal_id }}</td>
+                        <td>{{ mol.created|date:"Y-m-d H:i" }}</td>
+                        <td>{{ mol.sum_formula }}</td>
+                        <td>{{ mol.smiles }}</td>
+                        <td>{{ mol.inchi }}</td>
+                        <td class="mols-image">
+                            {{ mol.image|safe }}
+                        </td>
+                    </tr>
+                {% endfor %}
 
-    <div class="pagination">
+            </tbody>
+        </table>
+
+        <a id="a-download">Download SELECTED molecules as SDF</a> | <a id="a-download-all">Download ALL molecules as SDF</a>
+    </div>
+
+    <div id="div-pagination">
         <span class="step-links">
             {% if mols.has_previous %}
                 <a href="?page={{ mols.previous_page_number }}">previous</a>
@@ -46,6 +62,109 @@
                 <a href="?page={{ mols.next_page_number }}">next</a>
             {% endif %}
         </span>
+
+        <p>Number of molecules in database: {{ all_mols_count }}</p>
     </div>
 
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+
+    <script>
+        $('td.mols-select input[type="checkbox"]').change(function ()
+        {
+            var chb = $(this);
+            var tr = chb.parents("tr.mols");
+            var checked = chb.prop("checked");
+
+            if (checked)
+            {
+                tr.addClass("selected");
+            }
+            else
+            {
+                tr.removeClass("selected");
+            }
+        });
+
+        $("#a-download").click(function()
+        {
+            var mol_ids = [];
+
+            $("#table-mols tbody").find("input:checked").each(function()
+            {
+                mol_ids.push($(this).val());
+            });
+
+            var url = "?mol_ids[]=" + mol_ids.join("&mol_ids[]=");
+
+            $.fileDownload("http://127.0.0.1:8000/api/downloadMolecules" + url);
+
+            /*var mol_ids = [];
+
+            $("#table-mols").find("input:checked").each(function() {
+                mol_ids.push($(this).val());
+            });
+
+
+            $.ajax({
+                    url: "/api/downloadMolecules",
+                    method: "POST",
+                    data: {mol_ids: mol_ids},
+                    success: function(result)
+                    {
+                        $.fileDownload()
+                        console.log(result.url)
+
+                        if (result.success)
+                        {
+                            window.location = result.url;
+                        }
+                    }
+                });*/
+        });
+
+        $("#a-download-all").click(function()
+        {
+            $.fileDownload("http://127.0.0.1:8000/api/downloadMolecules?download_all=true");
+        });
+
+        $("#input-select-all").change(function()
+        {
+            var checked = $(this).prop("checked");
+
+            if (checked)
+            {
+                $("#table-mols tbody tr td.mols-select input").each(function()
+                {
+                    $(this).prop("checked", true);
+                    $(this).change();
+                });
+            }
+            else
+            {
+                $("#table-mols tbody tr td.mols-select input").each(function()
+                {
+                    $(this).prop("checked", false);
+                    $(this).change();
+                });
+            }
+        });
+
+        /*$("td.mols-select").click(function() {
+            var td = $(this);
+            var chb = td.find("input[type='checkbox']")
+            var checked = chb.prop("checked");
+
+            if (checked)
+            {
+                chb.prop("checked", false);
+            }
+            else
+            {
+                chb.prop("checked", true);
+            }
+        });*/
+    </script>
 {% endblock %}

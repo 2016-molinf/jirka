@@ -1,39 +1,46 @@
 from django.shortcuts import render
 from moldb import models
-from django.shortcuts import render_to_response
 from django.template import RequestContext
 from .forms import AddMoleculeForm
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from rdkit import Chem
 from .helper_functions import addMoleculeDictSerializer
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import json
 from django.utils.datastructures import MultiValueDictKeyError
+from django.core.files.temp import NamedTemporaryFile
+from wsgiref.util import FileWrapper
+from rdkit.Chem import AllChem
+import os
+import random
+from subprocess import Popen
+import time
 
 def home(request):
-    return render_to_response('home.html',
-                              {"molecules_count": models.Molecule.objects.count()})
+    return render(request,
+        'home.html',
+        {"molecules_count": models.Molecule.objects.count()})
 
-def add_molecule(request):
-    return render_to_response('add_molecule.html',
-                              {"form": AddMoleculeForm()})
+def add_molecules(request):
+    return render(request,
+        'add_molecules.html',
+        {"form": AddMoleculeForm()})
 
 def list_molecules(request):
     mols_list = models.Molecule.objects.all()
-    paginator = Paginator(mols_list, 2) # Show 25 contacts per page
+    paginator = Paginator(mols_list, 5)
 
     page = request.GET.get('page')
     try:
         mols = paginator.page(page)
     except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
         mols = paginator.page(1)
     except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
         mols = paginator.page(paginator.num_pages)
 
-    return render_to_response('list_molecules.html',
-                              {"mols": mols})
+    return render(request,
+        'list_molecules.html',
+        {"mols": mols, "all_mols_count": len(mols_list)})
 
 # API
 
@@ -83,6 +90,40 @@ def api_uploadMolecules(request):
             response.append(saveMol(smiles=line))
 
     return JsonResponse(response, safe=False)
+
+def api_downloadMolecules(request):
+    folder = "static/temp/"
+
+    if "download_all" in request.GET.keys():
+        mols = models.Molecule.objects.all()
+        filename = "molecules_all_{}_{}.sdf".format(time.strftime("%Y-%m-%d"), random.randint(1, 10000))
+    else:
+        mol_ids = [int(x) for x in request.GET.getlist("mol_ids[]")]
+        mols = models.Molecule.objects.filter(id__in=mol_ids)
+        filename = "molecules_{}_{}.sdf".format(time.strftime("%Y-%m-%d"), random.randint(1, 10000))
+        #newfile = NamedTemporaryFile(suffix='.sdf')
+
+    path = folder + filename
+
+    writer = AllChem.SDWriter(path)
+    for mol in mols:
+        writer.write(AllChem.MolFromSmiles(mol.smiles))
+    writer.close()
+
+    with open(path, mode="r", encoding="utf-8") as f:
+        response = HttpResponse(FileWrapper(f), content_type='application/download')
+        response['Content-Disposition'] = 'attachment; filename={}'.format(filename)
+        return response
+
+    #wrapper = FileWrapper(newfile)
+    #response = HttpResponse(wrapper, mime_type="application/force-download")
+    #response['Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(newfile.name)
+    #response['Content-Length'] = os.path.getsize(newfile.name)
+    #return response
+
+    #p = Popen("rm %s" % filepath, shell=True)"""
+
+    #return JsonResponse({"url": "http://{}/{}".format(request.get_host(), filename)})
 
 # helper functions
 
