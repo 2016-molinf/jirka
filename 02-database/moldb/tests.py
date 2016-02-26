@@ -18,7 +18,7 @@ M  END"""
 
     def test_add(self):
         mol = Molecule()
-        mol.save(self.propane)
+        mol.save(molfile=self.propane)
 
         self.assertEqual(mol.internal_id, "MI-J-1")
         self.assertEqual(mol.smiles, "CCC")
@@ -27,7 +27,7 @@ M  END"""
         self.assertEqual(mol.inchi, "InChI=1S/C3H8/c1-3-2/h3H2,1-2H3")
         self.assertEqual(mol.inchi_key, "ATUOYWHBWRKTHZ-UHFFFAOYSA-N")
 
-    def test_add_api(self):
+    def test_api_addMolecule(self):
         response = self.client.post(path="/api/addMolecule", data={"molfile": self.propane})
         self.assertEqual(response.status_code, 200)
 
@@ -41,7 +41,7 @@ M  END"""
         self.assertEqual(inchi, mol_added.inchi)
         self.assertEqual(AllChem.InchiToInchiKey(inchi), mol_added.inchi_key)
 
-    def test_converter_api(self):
+    def test_api_molConverter(self):
         response = self.client.post(path="/api/molConverter", data={"data": self.propane,
                                                                 "format_from": "molfile",
                                                                "format_to": "smiles"})
@@ -56,3 +56,20 @@ M  END"""
         data = json.loads(str(response.content, encoding="utf-8"))
         self.assertTrue(data["error"])
 
+    def test_api_uploadMolecules(self):
+        with open('moldb/tests_data/smiles_test.txt') as f:
+            response = self.client.post('/api/uploadMolecules', {'file': f})
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(str(response.content, encoding="utf-8"))
+
+        first_mol = data[0]
+        second_mol = data[1]
+
+        self.assertEqual(first_mol["internal_id"], "MI-J-1")
+        self.assertEqual(first_mol["smiles"], "FCCCl")
+        self.assertTrue(first_mol["success"])
+
+        self.assertTrue(second_mol["error"])
+        self.assertEqual(second_mol["smiles"], "C#C=C")
+        self.assertFalse(second_mol["success"])
