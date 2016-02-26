@@ -5,11 +5,10 @@
     {{ block.super }}
     <script src="{% static "js/ChemDoodleWeb.js" %}"></script>
     <script src="{% static "js/ChemDoodleWeb-uis.js" %}"></script>
-    <script src="{% static "js/csrf.js" %}"></script>
 
     <link href="{% static "css/ChemDoodleWeb.css" %}" rel="stylesheet" type="text/css">
     <link href="{% static "css/jquery-ui-1.10.3.custom.css" %}" rel="stylesheet" type="text/css">
-    <link href="{% static "css/add_molecule.css" %}" rel="stylesheet" type="text/css">
+    <link href="{% static "css/add_molecules.css" %}" rel="stylesheet" type="text/css">
 {% endblock %}
 
 {% block title %}Add molecule{% endblock %}
@@ -20,7 +19,7 @@
     <div id="div-adding-wrapper">
         <div id="div-chemdoodle">
             {% comment %}
-            <form id="form-add_molecule" method="POST">
+            <form id="form-add_molecules" method="POST">
                 {% csrf_token %}
                 {{ form.as_p }}
             </form>
@@ -58,9 +57,10 @@
 {% endblock %}
 
 {% block scripts %}
+    {{ block.super }}
+
     <script>
         var sketcher = new ChemDoodle.SketcherCanvas('canvas-chemdoodle', 500, 300, {useServices: true, oneMolecule: true});
-        var csrftoken = getCookie('csrftoken');
 
         function toggleLoad(mode)
         {
