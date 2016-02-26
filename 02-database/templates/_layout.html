@@ -11,8 +11,10 @@
 
         {% block staticfiles %}
             <link href="{% static "css/style.css" %}" rel="stylesheet" type="text/css">
+
             <script src="{% static "js/jquery-min.js" %}"></script>
             <script src="{% static "js/stringFormat.js" %}"></script>
+            <script src="{% static "js/csrf.js" %}"></script>
         {% endblock %}
     </head>
     <body>
@@ -25,9 +27,9 @@
                     <table id="table-menu">
                         <tr>
                             <td><a href="{% url 'home' %}">Home</a></td>
-                            <td><a href="{% url 'list_molecules' %}">List</a></td>
+                            <td><a href="{% url 'list_molecules' %}">List molecules</a></td>
                             <td><a href="">Search</a></td>
-                            <td><a href="{% url 'add_molecule' %}">Add molecule</a></td>
+                            <td><a href="{% url 'add_molecules' %}">Add molecules</a></td>
                         </tr>
                     </table>
                 </div>
@@ -45,6 +47,10 @@
             {% endblock %}
         </div>
 
-        {% block scripts %}{% endblock %}
+        {% block scripts %}
+            <script>
+                var csrftoken = getCookie('csrftoken');
+            </script>
+        {% endblock %}
     </body>
 </html>
