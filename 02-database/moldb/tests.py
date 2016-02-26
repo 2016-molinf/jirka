@@ -57,7 +57,7 @@ M  END"""
         self.assertTrue(data["error"])
 
     def test_api_uploadMolecules(self):
-        with open('moldb/tests_data/smiles_test.txt') as f:
+        with open('moldb/test_data/smiles_test.txt') as f:
             response = self.client.post('/api/uploadMolecules', {'file': f})
 
         self.assertEqual(response.status_code, 200)
