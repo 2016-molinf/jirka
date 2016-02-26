@@ -1,19 +1,29 @@
-#div-form {
-    display: inline;
+#div-adding-wrapper {
+    width: 100%;
+    float: left;
+    margin-top: 10px;
 }
 
 #div-chemdoodle {
-    display: inline;
+    float: left;
+    width: 50%;
+    margin: auto auto;
+    border-right: 1px dotted black;
 }
 
-#div-choosing {
-    float: left;
-    margin-left: 20%;
+#div-import {
+    width: 50%;
+    margin-left: auto;
+}
+
+#div-info {
+    margin-top: 15px;
 }
 
 #div-buttons {
     display: block;
     margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 #div-buttons button {
@@ -33,16 +43,6 @@ arrow:hover {
 
 input[type="text"] {
     width: 80%;
-}
-
-p.error {
-    color: red;
-    font-weight: bold;
-}
-
-p.success {
-    color: #35c308;
-    font-weight: bold;
 }
 
 #div-loader {
@@ -74,4 +74,22 @@ button[disabled] {
 molid {
     font-style: italic;
     color: #005bc3;
+}
+
+#table-info {
+    margin: 0 auto;
+    border-top: 1px dotted black;
+    border-collapse: collapse;
+}
+
+tr {
+    border: 1px solid black;
+}
+
+tr.success {
+    background-color: #71e68e;
+}
+
+tr.error {
+    background-color: #ff9193;
 }
