@@ -1,0 +1,6 @@
+CCC
+ClCCF
+C(O)C
+CC=O
+BrCC(O)O
+C#C=C
