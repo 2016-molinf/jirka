@@ -3,9 +3,34 @@
 {% block title %}List molecules{% endblock %}
 
 {% block content %}
-    {% for mol in mols %}
-        {{ mol.sum_formula }}<br />
-    {% endfor %}
+    <table id="table-mols">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Added</th>
+                <th>Sum formula</th>
+                <th>SMILES</th>
+                <th>InCHi</th>
+                <th>Structure</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% for mol in mols %}
+                <tr>
+                    <td>{{ mol.internal_id }}</td>
+                    <td>{{ mol.created }}</td>
+                    <td>{{ mol.sum_formula }}</td>
+                    <td>{{ mol.smiles }}</td>
+                    <td>{{ mol.inchi }}</td>
+                    <td>
+                        {{ mol.image }}
+                    </td>
+                </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
 
     <div class="pagination">
         <span class="step-links">
@@ -22,4 +47,5 @@
             {% endif %}
         </span>
     </div>
+
 {% endblock %}
