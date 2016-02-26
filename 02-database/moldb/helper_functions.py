@@ -1,10 +1,12 @@
 from django.http import JsonResponse
 
-def addMoleculeJsonResponse(success, data="", error="", smiles=None):
+def addMoleculeDictSerializer(success, internal_id=None, error=None, smiles=None):
     if success:
-        if smiles:
-            return JsonResponse({"success": True, "data": data, "smiles": smiles})
-        else:
-            return JsonResponse({"success": True, "data": data})
+        response = {"success": True, "internal_id": internal_id}
     else:
-        return JsonResponse({"success": False, "error": error})
+        response = {"success": False, "error": error}
+
+    if smiles:
+        response.update({"smiles": smiles})
+
+    return response
