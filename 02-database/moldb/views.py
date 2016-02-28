@@ -79,6 +79,7 @@ def api_addMolecule(request):
 
 def api_uploadMolecules(request):
     try:
+        type = request.POST["type"]
         file = request.FILES["file"]
     except MultiValueDictKeyError:
         return JsonResponse([addMoleculeDictSerializer(False, error="No file supplied.", smiles="-")], safe=False)
@@ -134,12 +135,12 @@ def saveMol(smiles=None, molfile=None):
         try:
             mol.save(smiles=smiles, molfile=molfile)
         except models.Molecule.MoleculeExistsInDatabase as e:
-            return addMoleculeDictSerializer(False, error="Cannot add the molecule: it already exists in database.", smiles=e.smiles)
-        except models.Molecule.MoleculeCreationError:
+            return addMoleculeDictSerializer(False, error=e.message, smiles=e.smiles)
+        except models.Molecule.MoleculeCreationError as e:
             if smiles:
-                return addMoleculeDictSerializer(False, error="Cannot add the molecule: check your structure (valence etc.).", smiles=smiles)
+                return addMoleculeDictSerializer(False, error=e.message, smiles=smiles)
             else:
-                return addMoleculeDictSerializer(False, error="Cannot add the molecule: check your structure (valence etc.).")
+                return addMoleculeDictSerializer(False, error=e.message)
 
         return addMoleculeDictSerializer(True, internal_id=mol.internal_id, smiles=mol.smiles)
     else:

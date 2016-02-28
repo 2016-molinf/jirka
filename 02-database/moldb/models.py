@@ -73,6 +73,9 @@ class Molecule(models.Model):
         def __init__(self, smiles):
             super(Exception, self).__init__(smiles)
             self.smiles = smiles
+            self.message = "Cannot add the molecule: it already exists in database."
 
     class MoleculeCreationError(Exception):
-        pass
+        def __init__(self, smiles):
+            super(Exception, self).__init__()
+            self.message = "Cannot add the molecule: check your structure (valence etc.)."
