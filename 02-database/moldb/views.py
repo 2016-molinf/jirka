@@ -14,6 +14,9 @@ import os
 import random
 from subprocess import Popen
 import time
+import logging
+
+logger = logging.getLogger(__name__)
 
 def home(request):
     return render(request,
@@ -110,7 +113,7 @@ def api_uploadMolecules(request):
         else:
             return JsonResponseStatus("error", message="Invalid filetype.")
     except Exception as e:
-        #print(str(e))
+        logger.error(str(e))
         return JsonResponseStatus("error", message="Invalid file supplied.")
 
     return JsonResponseStatus("success", data=data)
