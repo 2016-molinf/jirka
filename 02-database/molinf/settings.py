@@ -35,7 +35,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'moldb'
+    'moldb',
+    'django_rdkit'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -75,10 +76,23 @@ WSGI_APPLICATION = 'molinf.wsgi.application'
 
 DATABASES = {
     'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'moldb',
+        'USER': 'moldb',
+        'PASSWORD': 'monitor',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+    }
+}
+
+"""
+DATABASES = {
+    'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'moldb.sqlite3'),
     }
 }
+"""
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
@@ -113,3 +127,8 @@ USE_TZ = True
 STATIC_ROOT = ''
 STATIC_URL = '/static/'
 STATICFILES_DIRS = ( os.path.join('static'), )
+
+FILE_UPLOAD_TEMP_DIR = "static/temp/"
+
+FILE_UPLOAD_HANDLERS = ("django.core.files.uploadhandler.MemoryFileUploadHandler",
+ "django.core.files.uploadhandler.TemporaryFileUploadHandler",)

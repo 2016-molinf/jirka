@@ -1,9 +1,9 @@
-from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
 from rdkit.Chem import AllChem
 from rdkit import Chem
 from rdkit.Chem.Draw import rdMolDraw2D
 from rdkit.Chem import rdDepictor
+from django_rdkit import models
 
 class Molecule(models.Model):
     """
@@ -11,6 +11,7 @@ class Molecule(models.Model):
     """
 
     # fields, which can be calculated on save():
+    rdmol = models.MolField()
     internal_id = models.CharField(max_length=32, db_index=True)
     image = models.TextField()
     mw = models.FloatField(db_index=True)
@@ -25,11 +26,13 @@ class Molecule(models.Model):
     def __str__(self):
         return "Molecule ({id}): '{name}', formula: '{formula}'".format(id=self.internal_id, name=self.name, formula=self.sum_formula)
 
-    def save(self, smiles=None, molfile=None, *args, **kwargs):
+    def save(self, smiles=None, molfile=None, rdmol=None, *args, **kwargs):
         if molfile:
             mol = Chem.MolFromMolBlock(molfile)
         elif smiles:
             mol = Chem.MolFromSmiles(smiles)
+        elif rdmol:
+            mol = rdmol
 
         if mol:
             smiles = Chem.MolToSmiles(mol)
@@ -63,6 +66,8 @@ class Molecule(models.Model):
                 self.inchi = Chem.MolToInchi(mol)
                 self.inchi_key = AllChem.InchiToInchiKey(self.inchi)
 
+                self.rdmol = mol
+
                 super(Molecule, self).save(*args, **kwargs)
             else:
                 raise self.MoleculeExistsInDatabase(smiles)
@@ -76,6 +81,6 @@ class Molecule(models.Model):
             self.message = "Cannot add the molecule: it already exists in database."
 
     class MoleculeCreationError(Exception):
-        def __init__(self, smiles):
+        def __init__(self):
             super(Exception, self).__init__()
             self.message = "Cannot add the molecule: check your structure (valence etc.)."
