@@ -3,8 +3,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta charset="utf-8">
-        {# <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> #}
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         {# <meta http-equiv="X-UA-Compatible" content="chrome=1"> #}
 
         <title>{% block title %}{% endblock %} @ MolDB</title>
@@ -21,14 +20,14 @@
         <div id="div-wrapper">
             <div id="div-header">
                 <div id="div-title">
-                    <h1 style="color: #ff6200;">MolDB</h1>
+                    <a href="/"><h1 style="color: #ff6200;">MolDB</h1></a>
                 </div>
                 <div id="div-menu">
                     <table id="table-menu">
                         <tr>
                             <td><a href="{% url 'home' %}">Home</a></td>
                             <td><a href="{% url 'list_molecules' %}">List molecules</a></td>
-                            <td><a href="">Search</a></td>
+                            {# <td><a href="">Search</a></td> #}
                             <td><a href="{% url 'add_molecules' %}">Add molecules</a></td>
                         </tr>
                     </table>

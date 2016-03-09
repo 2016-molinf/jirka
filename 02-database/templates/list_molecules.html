@@ -15,6 +15,22 @@
 {% block content %}
     <h2>List molecules</h2>
 
+    <div class="div-pagination">
+        <span class="step-links">
+            {% if mols.has_previous %}
+                <a href="?page={{ mols.previous_page_number }}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ mols.number }} of {{ mols.paginator.num_pages }}.
+            </span>
+
+            {% if mols.has_next %}
+                <a href="?page={{ mols.next_page_number }}">next</a>
+            {% endif %}
+        </span>
+    </div>
+
     <div id="div-table">
         <table id="table-mols">
             <thead>
@@ -50,7 +66,7 @@
         <a id="a-download">Download SELECTED molecules as SDF</a> | <a id="a-download-all">Download ALL molecules as SDF</a>
     </div>
 
-    <div id="div-pagination">
+    <div class="div-pagination">
         <span class="step-links">
             {% if mols.has_previous %}
                 <a href="?page={{ mols.previous_page_number }}">previous</a>
