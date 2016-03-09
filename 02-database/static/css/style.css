@@ -27,6 +27,11 @@ body {
 #div-content {
     margin-top: 20px;
     margin-bottom: 20px;
+	font-size: 12px;
+}
+
+th {
+    font-size: 14px;
 }
 
 a {
@@ -65,7 +70,7 @@ button {
 	display:inline-block;
 	cursor:pointer;
 	color:#ffffff;
-	font-family:Arial;
+	font-family: Arial;
 	font-size:13px;
 	padding:6px 24px;
 	text-decoration:none;

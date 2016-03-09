@@ -1,4 +1,6 @@
 #table-mols {
+    overflow: hidden;
+    table-layout: fixed;
     margin: 0 auto;
     border-top: 1px dotted black;
     border-collapse: collapse;
@@ -52,4 +54,18 @@ input[type="checkbox"] {
     -moz-transform: scale(2); /* FF */
     -webkit-transform: scale(2); /* Safari and Chrome */
     -o-transform: scale(2); /* Opera */
+}
+
+#div-table {
+    padding-right: 5%;
+    padding-left: 5%;
+}
+
+.auto-width {
+    width: auto;
+}
+
+.break {
+    word-break: break-all;
+    width: 30%;
 }

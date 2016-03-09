@@ -16,10 +16,6 @@
     margin-left: auto;
 }
 
-#div-info {
-    margin-top: 15px;
-}
-
 #div-buttons {
     display: block;
     margin-top: 10px;
@@ -77,6 +73,9 @@ molid {
 }
 
 #table-info {
+    overflow: hidden;
+    width: 100%;
+    table-layout: fixed;
     margin: 0 auto;
     border-top: 1px dotted black;
     border-collapse: collapse;
@@ -86,10 +85,31 @@ tr {
     border: 1px solid black;
 }
 
+td {
+    word-wrap: break-word;
+}
+
 tr.success {
     background-color: #71e68e;
 }
 
 tr.error {
     background-color: #ff9193;
+}
+
+tr.error:hover, tr.success:hover {
+    border-color: #005bc3;
+    border-width: 2px;
+}
+
+#div-info {
+    padding-top: 50px;
+    padding-right: 5%;
+    padding-left: 5%;
+}
+
+#div-error {
+    font-size: 14px;
+    font-weight: bold;
+    color: #d3001b;
 }
