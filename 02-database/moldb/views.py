@@ -34,7 +34,7 @@ def add_molecules(request):
 
 def list_molecules(request):
     mols_list = models.Molecule.objects.all()
-    paginator = Paginator(mols_list, 5)
+    paginator = Paginator(mols_list, 20)
 
     page = request.GET.get('page')
     try:
