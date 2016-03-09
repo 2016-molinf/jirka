@@ -37,6 +37,7 @@ class Molecule(models.Model):
         if mol:
             smiles = Chem.MolToSmiles(mol)
 
+            # TODO: check Inchi instead of SMILES
             if smiles and Molecule.objects.filter(smiles=smiles).count() == 0 and len(smiles) > 1:
                 self.smiles = smiles
 
