@@ -130,7 +130,7 @@ STATICFILES_DIRS = ( os.path.join('static'), )
 
 FILE_UPLOAD_TEMP_DIR = "static/temp/"
 
-FILE_UPLOAD_HANDLERS = ("django.core.files.uploadhandler.MemoryFileUploadHandler",
+FILE_UPLOAD_HANDLERS = (#"django.core.files.uploadhandler.MemoryFileUploadHandler",
  "django.core.files.uploadhandler.TemporaryFileUploadHandler",)
 
 LOGGING = {
