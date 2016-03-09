@@ -1,3 +1,5 @@
+{# TODO: open molecule structure zoomed in new windows (or provide bitmap version) #}
+
 {% extends '_layout.html' %}
 {% load staticfiles %}
 
@@ -17,12 +19,12 @@
         <table id="table-mols">
             <thead>
                 <tr class="mols">
-                    <th class="mols-select"><input id="input-select-all" type="checkbox" /></th>
-                    <th class="mols-id">ID</th>
-                    <th>Added</th>
-                    <th>Sum formula</th>
-                    <th>SMILES</th>
-                    <th>InCHi</th>
+                    <th class="mols-select auto-width"><input id="input-select-all" type="checkbox" /></th>
+                    <th class="mols-id auto-width">ID</th>
+                    <th class="auto-width">Added</th>
+                    <th class="auto-width">Sum formula</th>
+                    <th class="break">SMILES</th>
+                    <th class="break">InCHi</th>
                     <th class="mols-image">Structure</th>
                 </tr>
             </thead>
@@ -30,12 +32,12 @@
 
                 {% for mol in mols %}
                     <tr class="mols">
-                        <td class="mols-select"><input type="checkbox" value="{{ mol.id }}" /></td>
-                        <td class="mols-id">{{ mol.internal_id }}</td>
-                        <td>{{ mol.created|date:"Y-m-d H:i" }}</td>
-                        <td>{{ mol.sum_formula }}</td>
-                        <td>{{ mol.smiles }}</td>
-                        <td>{{ mol.inchi }}</td>
+                        <td class="mols-select auto-width"><input type="checkbox" value="{{ mol.id }}" /></td>
+                        <td class="mols-id auto-width">{{ mol.internal_id }}</td>
+                        <td class="auto-width">{{ mol.created|date:"Y-m-d H:i" }}</td>
+                        <td class="auto-width">{{ mol.sum_formula }}</td>
+                        <td class="break">{{ mol.smiles }}</td>
+                        <td class="break">{{ mol.inchi }}</td>
                         <td class="mols-image">
                             {{ mol.image|safe }}
                         </td>
