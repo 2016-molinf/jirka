@@ -154,11 +154,6 @@ LOGGING = {
         },
     },
     'loggers': {
-        'django': {
-            'handlers':['file'],
-            'propagate': True,
-            'level':'DEBUG',
-        },
         'moldb': {
             'handlers': ['file'],
             'level': 'DEBUG',
