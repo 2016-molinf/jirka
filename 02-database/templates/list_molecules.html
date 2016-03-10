@@ -117,14 +117,13 @@
 
             var url = "?mol_ids[]=" + mol_ids.join("&mol_ids[]=");
 
-            $.fileDownload("http://127.0.0.1:8000/api/downloadMolecules" + url);
-
+            //$.fileDownload("http://127.0.0.1:8000/api/downloadMolecules" + url);
+            $.fileDownload("{% url 'api_downloadMolecules' %}" + url);
             /*var mol_ids = [];
 
             $("#table-mols").find("input:checked").each(function() {
                 mol_ids.push($(this).val());
             });
-
 
             $.ajax({
                     url: "/api/downloadMolecules",
@@ -145,7 +144,8 @@
 
         $("#a-download-all").click(function()
         {
-            $.fileDownload("http://127.0.0.1:8000/api/downloadMolecules?download_all=true");
+            //$.fileDownload("/api/downloadMolecules?download_all=true");
+            $.fileDownload("{% url 'api_downloadMolecules' %}" + "?download_all=true");
         });
 
         $("#input-select-all").change(function()

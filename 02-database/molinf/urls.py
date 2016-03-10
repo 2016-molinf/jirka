@@ -31,5 +31,5 @@ urlpatterns = [
     url(r'^api/addMolecule$', moldb.views.api_addMolecule, name='api_addMolecule'),
     url(r'^api/uploadMolecules$', moldb.views.api_uploadMolecules, name='api_uploadMolecules'),
     url(r'^api/uploadMolecules/status$', moldb.views.api_uploadMoleculesStatus, name='api_uploadMoleculesStatus'),
-    url(r'^api/downloadMolecules$', moldb.views.api_downloadMolecules, name='api_downloadMolecules$')
+    url(r'^api/downloadMolecules$', moldb.views.api_downloadMolecules, name='api_downloadMolecules')
 ]
