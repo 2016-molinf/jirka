@@ -193,7 +193,7 @@ def api_searchMoleculesByStructure(request):
                                                                     request=request),
                                                         "mols_count": len(mols_list)})
         else:
-            models.Molecule.MoleculeCreationError
+            raise models.Molecule.MoleculeCreationError
     except models.Molecule.MoleculeCreationError as e:
         return JsonResponseStatus("error", message=e.message)
 
