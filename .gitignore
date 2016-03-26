@@ -3,3 +3,4 @@ __pycache__/
 moldb/migrations/*.py
 *.sdf
 moldb.sqlite3
+*.log
