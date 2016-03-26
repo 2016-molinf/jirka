@@ -23,57 +23,62 @@ class Molecule(models.Model):
     smiles = models.TextField(db_index=True)
     created = models.DateTimeField(auto_now_add=True)
 
+    # excluded molecules SMILES (they cause rdKit stuck)
+    EXCLUDED_MOLECULES = ["C", "CH3", "CH4", "[CH3]", "[C]", "[CH4]"]
+
     def __str__(self):
         return "Molecule ({id}): '{name}', formula: '{formula}'".format(id=self.internal_id, name=self.name, formula=self.sum_formula)
 
-    def save(self, smiles=None, molfile=None, rdmol=None, *args, **kwargs):
-        if molfile:
-            mol = Chem.MolFromMolBlock(molfile)
-        elif smiles:
-            mol = Chem.MolFromSmiles(smiles)
-        elif rdmol:
-            mol = rdmol
+    def save(self, smiles=None, molfile=None, rdmol=None, inchi=None, update=False, *args, **kwargs):
+        if not update:
+            if molfile:
+                mol = AllChem.MolFromMolBlock(molfile)
+            elif smiles:
+                mol = AllChem.MolFromSmiles(smiles)
+            elif rdmol:
+                mol = rdmol
+            elif inchi:
+                mol = AllChem.MolFromInchi(inchi)
 
-        if mol:
-            smiles = Chem.MolToSmiles(mol)
+            if mol:
+                inchi = AllChem.MolToInchi(mol)
+                smiles = AllChem.MolToSmiles(mol)
 
-            # TODO: check Inchi instead of SMILES
-            if smiles and Molecule.objects.filter(smiles=smiles).count() == 0 and len(smiles) > 1:
-                self.smiles = smiles
+                if inchi and Molecule.objects.filter(inchi=inchi).count() == 0 and len(inchi) > 1:
+                    self.inchi = inchi
 
-                try:
-                    last_id = Molecule.objects.latest('id').id + 1
-                except ObjectDoesNotExist:
-                    last_id = 1
+                    self.mw = float("{0:.2f}".format(AllChem.CalcExactMolWt(mol)))
+                    self.sum_formula = AllChem.CalcMolFormula(mol)
+                    self.fingerprint = AllChem.GetMorganFingerprintAsBitVect(mol, 4, nBits=1024).ToBitString()
+                    self.inchi_key = AllChem.InchiToInchiKey(self.inchi)
+                    self.molfile = AllChem.MolToMolBlock(mol)
+                    self.smiles = smiles
+                    self.rdmol = mol
 
-                self.internal_id = "MI-J-{}".format(last_id)
+                    # generating SVG image
+                    if self.smiles not in self.EXCLUDED_MOLECULES:
+                        binMol = AllChem.Mol(self.rdmol.ToBinary())
 
-                # generating SVG image
-                binMol = Chem.Mol(mol.ToBinary())
+                        if not binMol.GetNumConformers():
+                            rdDepictor.Compute2DCoords(self.rdmol)
 
-                if not binMol.GetNumConformers():
-                    rdDepictor.Compute2DCoords(mol)
+                        drawer = rdMolDraw2D.MolDraw2DSVG(100, 100)
+                        drawer.DrawMolecule(self.rdmol)
+                        drawer.FinishDrawing()
+                        svg = drawer.GetDrawingText().replace('svg:', '')
 
-                drawer = rdMolDraw2D.MolDraw2DSVG(100, 100)
-                drawer.DrawMolecule(mol)
-                drawer.FinishDrawing()
-                svg = drawer.GetDrawingText().replace('svg:', '')
-                # remove first line containg XML meta information
-                self.image = "\n".join(svg.split("\n")[1:]).strip()
+                        # remove first line containg XML meta information
+                        self.image_svg = "\n".join(svg.split("\n")[1:]).strip()
+                    else:
+                        self.image_svg = None
 
-                self.mw = float("{0:.2f}".format(AllChem.CalcExactMolWt(mol)))
-                self.sum_formula = AllChem.CalcMolFormula(mol)
-                self.fingerprint = AllChem.GetMorganFingerprintAsBitVect(mol, 4, nBits=1024).ToBitString()
-                self.inchi = Chem.MolToInchi(mol)
-                self.inchi_key = AllChem.InchiToInchiKey(self.inchi)
-
-                self.rdmol = mol
-
-                super(Molecule, self).save(*args, **kwargs)
+                    super(Molecule, self).save(*args, **kwargs)
+                else:
+                    raise self.MoleculeExistsInDatabase(smiles)
             else:
-                raise self.MoleculeExistsInDatabase(smiles)
+                raise self.MoleculeCreationError
         else:
-            raise self.MoleculeCreationError
+            super(Molecule, self).save(*args, **kwargs)
 
     class MoleculeExistsInDatabase(Exception):
         def __init__(self, smiles):

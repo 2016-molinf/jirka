@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.template.loader import render_to_string
 from moldb import models
 from django.template import RequestContext
 from .forms import AddMoleculeForm
@@ -46,7 +47,17 @@ def list_molecules(request):
 
     return render(request,
         'list_molecules.html',
-        {"mols": mols, "all_mols_count": len(mols_list)})
+        {"mols": mols, "all_mols_count": len(mols_list), "type": "list"})
+
+def search_molecules(request, *args, **kwargs):
+    return render(request,
+                  'search_molecules.html',
+                  {})
+
+def test(request):
+    return render(request,
+                  'temp_bootstrap.html',
+                  {"mols": models.Molecule.objects.all()})
 
 # API
 
@@ -163,6 +174,28 @@ def api_downloadMolecules(request):
         response = HttpResponse(FileWrapper(f), content_type='application/download')
         response['Content-Disposition'] = 'attachment; filename={}'.format(filename)
         return response
+
+def api_searchMoleculesByStructure(request):
+    try:
+        mol = Chem.MolFromMolBlock(request.POST["molfile"])
+
+        if mol:
+            if request.POST["type"] == "exact":
+                mols_list = models.Molecule.objects.filter(inchi=Chem.MolToInchi(mol))
+            elif request.POST["type"] == "substructure":
+                mols_list = models.Molecule.objects.filter(rdmol__hassubstruct=Chem.MolToSmiles(mol))
+
+            if request.POST["form"] == "table":
+                return JsonResponseStatus("success", data={
+                                                        "table": render_to_string(
+                                                                    '_molecules_table.html',
+                                                                    context={"mols": mols_list, "all_mols_count": len(mols_list), "type": "search"},
+                                                                    request=request),
+                                                        "mols_count": len(mols_list)})
+        else:
+            models.Molecule.MoleculeCreationError
+    except models.Molecule.MoleculeCreationError as e:
+        return JsonResponseStatus("error", message=e.message)
 
 # helper functions
 

@@ -1,9 +1,19 @@
 {% extends '_layout.html' %}
+{% block home_active %}active{% endblock %}
 
 {% block title %}Home{% endblock %}
 
 {% block content %}
-    <h2>Welcome to MolDB!</h2>
-
-    <p>Currently there are {{ molecules_count }} molecules in the database.</p>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12 col-centered text-center col-heading">
+                <h2>Welcome to MolDB!</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12 col-centered text-center">
+                <p>Currently there are {{ molecules_count }} molecules in the database.</p>
+            </div>
+        </div>
+    </div>
 {% endblock %}

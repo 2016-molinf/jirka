@@ -1,6 +1,7 @@
 {# TODO: open molecule structure zoomed in new windows (or provide bitmap version) #}
 
 {% extends '_layout.html' %}
+{% block list_active %}active{% endblock %}
 {% load staticfiles %}
 
 {% block staticfiles %}
@@ -13,77 +14,65 @@
 {% block title %}List molecules{% endblock %}
 
 {% block content %}
-    <h2>List molecules</h2>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12 col-centered text-center">
+                <h2>Add molecules</h2>
+            </div>
+        </div>
 
-    <div class="div-pagination">
-        <span class="step-links">
-            {% if mols.has_previous %}
-                <a href="?page={{ mols.previous_page_number }}">previous</a>
-            {% endif %}
+        {% if mols %}
+            <div class="row">
+                <div class="col-sm-12 col-centered text-center">
+                    <div class="div-pagination">
+                        <span class="step-links">
+                            {% if mols.has_previous %}
+                                <a href="?page={{ mols.previous_page_number }}">previous</a>
+                            {% endif %}
 
-            <span class="current">
-                Page {{ mols.number }} of {{ mols.paginator.num_pages }}.
-            </span>
+                            <span class="current">
+                                Page {{ mols.number }} of {{ mols.paginator.num_pages }}.
+                            </span>
 
-            {% if mols.has_next %}
-                <a href="?page={{ mols.next_page_number }}">next</a>
-            {% endif %}
-        </span>
+                            {% if mols.has_next %}
+                                <a href="?page={{ mols.next_page_number }}">next</a>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {% include "_molecules_table.html" %}
+
+            <div class="row">
+                <div class="col-sm-12 col-centered text-center">
+                    <div class="div-pagination">
+                        <span class="step-links">
+                            {% if mols.has_previous %}
+                                <a href="?page={{ mols.previous_page_number }}">previous</a>
+                            {% endif %}
+
+                            <span class="current">
+                                Page {{ mols.number }} of {{ mols.paginator.num_pages }}.
+                            </span>
+
+                            {% if mols.has_next %}
+                                <a href="?page={{ mols.next_page_number }}">next</a>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12 col-centered text-center">
+                    <p>Number of all molecules in database: <strong>{{ all_mols_count }}</strong></p>
+                </div>
+            </div>
+        {% else %}
+            <h2 style="color: red;">No molecules found.</h2>
+        {% endif %}
     </div>
-
-    <div id="div-table">
-        <table id="table-mols">
-            <thead>
-                <tr class="mols">
-                    <th class="mols-select auto-width"><input id="input-select-all" type="checkbox" /></th>
-                    <th class="mols-id auto-width">ID</th>
-                    <th class="auto-width">Added</th>
-                    <th class="auto-width">Sum formula</th>
-                    <th class="break">SMILES</th>
-                    <th class="break">InCHi</th>
-                    <th class="mols-image">Structure</th>
-                </tr>
-            </thead>
-            <tbody>
-
-                {% for mol in mols %}
-                    <tr class="mols">
-                        <td class="mols-select auto-width"><input type="checkbox" value="{{ mol.id }}" /></td>
-                        <td class="mols-id auto-width">{{ mol.internal_id }}</td>
-                        <td class="auto-width">{{ mol.created|date:"Y-m-d H:i" }}</td>
-                        <td class="auto-width">{{ mol.sum_formula }}</td>
-                        <td class="break">{{ mol.smiles }}</td>
-                        <td class="break">{{ mol.inchi }}</td>
-                        <td class="mols-image">
-                            {{ mol.image|safe }}
-                        </td>
-                    </tr>
-                {% endfor %}
-
-            </tbody>
-        </table>
-
-        <a id="a-download">Download SELECTED molecules as SDF</a> | <a id="a-download-all">Download ALL molecules as SDF</a>
-    </div>
-
-    <div class="div-pagination">
-        <span class="step-links">
-            {% if mols.has_previous %}
-                <a href="?page={{ mols.previous_page_number }}">previous</a>
-            {% endif %}
-
-            <span class="current">
-                Page {{ mols.number }} of {{ mols.paginator.num_pages }}.
-            </span>
-
-            {% if mols.has_next %}
-                <a href="?page={{ mols.next_page_number }}">next</a>
-            {% endif %}
-        </span>
-
-        <p>Number of molecules in database: {{ all_mols_count }}</p>
-    </div>
-
 {% endblock %}
 
 {% block scripts %}
@@ -117,34 +106,11 @@
 
             var url = "?mol_ids[]=" + mol_ids.join("&mol_ids[]=");
 
-            //$.fileDownload("http://127.0.0.1:8000/api/downloadMolecules" + url);
             $.fileDownload("{% url 'api_downloadMolecules' %}" + url);
-            /*var mol_ids = [];
-
-            $("#table-mols").find("input:checked").each(function() {
-                mol_ids.push($(this).val());
-            });
-
-            $.ajax({
-                    url: "/api/downloadMolecules",
-                    method: "POST",
-                    data: {mol_ids: mol_ids},
-                    success: function(result)
-                    {
-                        $.fileDownload()
-                        console.log(result.url)
-
-                        if (result.success)
-                        {
-                            window.location = result.url;
-                        }
-                    }
-                });*/
         });
 
         $("#a-download-all").click(function()
         {
-            //$.fileDownload("/api/downloadMolecules?download_all=true");
             $.fileDownload("{% url 'api_downloadMolecules' %}" + "?download_all=true");
         });
 

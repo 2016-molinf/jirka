@@ -1,6 +1,8 @@
-{# TODO: check if file is empty or no file supplied #}
+{# TODO: add CSS for add or import error ('Invalid file supplied.' etc.) #}
+{# TODO: write import error to the import panel #}
 
 {% extends '_layout.html' %}
+{% block add_active %}active{% endblock %}
 {% load staticfiles %}
 
 {% block staticfiles %}
@@ -16,82 +18,106 @@
 {% block title %}Add molecule{% endblock %}
 
 {% block content %}
-    <h2>Add molecule</h2>
-
-    <div id="div-adding-wrapper">
-        <div id="div-chemdoodle">
-            {% comment %}
-            <form id="form-add_molecules" method="POST">
-                {% csrf_token %}
-                {{ form.as_p }}
-            </form>
-
-            <div id="div-arrows">
-                <arrow>&uarr;</arrow><arrow>&darr;</arrow>
-            </div>
-            {% endcomment %}
-
-            <p>You can draw a structure:</p>
-
-            <canvas id="canvas-chemdoodle"></canvas>
-
-            <input id="input-smiles" type="text" readonly="readonly" />
-
-            <div id="div-buttons">
-                <button id="button-add" type="submit">Add</button>
-                <!--<button id="button-reset" type="reset">Reset</button>-->
-                <button id="button-smiles" type="button">Show SMILES</button>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12 col-centered text-center">
+                <h2>Add molecules</h2>
             </div>
         </div>
 
-        <div id="div-import">
-            <p>You can import file containing molecules. Supports:</p>
+        <div class="row">
+            <div id="div-chemdoodle" class="col-md-6 col-sm-12 text-center">
+                <div id="panel-chemdoodle" class="panel panel-default">
+                    <div class="panel-heading larger">
+                        Draw a structure
+                    </div>
 
-            <ul>
-                <li>
-                    <i>SMILES</i>: one per line
-                </li>
-                <li>
-                    <i>SDF</i>: separated by '$$$$'
-                </li>
-            </ul>
+                    <div class="panel-body">
+                        <canvas id="canvas-chemdoodle"></canvas>
 
-            <form id="form-import" enctype="multipart/form-data">
-                {% csrf_token %}
-                <input id="input-file" type="file" />
-                <select id="select-file">
-                    <option id="smiles" value="smiles">SMILES</option>
-                    <option id="sdf" value="sdf">SDF</option>
-                </select>
-                <button id="button-import" type="submit">Import</button>
-            </form>
+                        <input id="input-smiles" type="text" class="form-control" readonly="readonly" style="width: 100%;" />
+
+                        <div class="input-group col-centered">
+                            <button id="button-add" type="submit" class="btn btn-primary">Add</button>
+                            <button id="button-smiles" type="submit" class="btn btn-info">Show SMILES</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-sm-12 text-center">
+                <div class="panel panel-default">
+                    <div class="panel-heading larger">
+                        Import molecules from file
+                    </div>
+
+                    <div class="panel-body" style="padding: 30px !important;">
+                        <form id="form-import" class="form-horizontal" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <input id="input-file" class="form-control" type="file" />
+                                <label for="select-file" class="control-label">File type:</label>
+                                <select id="select-file" class="form-control">
+                                    <option id="smiles" value="smiles">SMILES</option>
+                                    <option id="sdf" value="sdf">SDF</option>
+                                </select>
+                                <button id="button-import" type="submit" class="btn btn-primary">Import</button>
+                            </div>
+                        </form>
+
+                        <div class="form-group pull-right">
+                            <button id="button-import-info" type="button" class="btn btn-info" data-toggle="collapse" data-target="#div-import-info" aria-label="Import info" style="display: block;">
+                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                                Info
+                            </button>
+                        </div>
+
+                        <div id="div-import-info" class="collapse" style="margin-top: 10px;">
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <td class="td-bold">SMILES</td>
+                                        <td>one per line</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="td-bold">SDF</td>
+                                        <td>separated by '$$$$'</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 25px; margin-bottom: 50px;">
+            <div class="col-sm-12 col-centered">
+                <div id="div-info"></div>
+            </div>
         </div>
     </div>
-
-    <div id="div-info">
-        <div id="div-table-info"></div>
-    </div>
-
 {% endblock %}
 
 {% block scripts %}
     {{ block.super }}
 
     <script>
-        var sketcher = new ChemDoodle.SketcherCanvas('canvas-chemdoodle', 500, 300, {useServices: true, oneMolecule: true});
+        var sketcher_width = $("#panel-chemdoodle").outerWidth() - 50;
+        var sketcher_height = 300;
+
+        //var sketcher = new ChemDoodle.SketcherCanvas('canvas-chemdoodle', 500, 300, {useServices: true, oneMolecule: true});
+        var sketcher = new ChemDoodle.SketcherCanvas('canvas-chemdoodle', sketcher_width, 300, {oneMolecule: true, isMobile: true});
         var uploadStatusInterval;
 
-        function toggleLoad(mode)
+        function disableButtons(mode)
         {
             if (mode)
             {
-                $("#div-info").prepend("<div id='div-loader'><img src='{% static 'image/gear.gif' %}' alt='Loading...' /></div>");
                 $("#div-buttons #button-add").prop('disabled', true);
                 $("#button-import").prop('disabled', true);
             }
             else
             {
-                $("#div-info #div-loader").remove();
                 $("#div-buttons #button-add").prop('disabled', false);
                 $("#button-import").prop('disabled', false);
             }
@@ -180,18 +206,16 @@
         {
             //console.log(result);
 
-            $("#div-info").html(`
-                <table id="table-info" cellpadding="10">
-                    <thead>
-                        <tr>
-                            <th style="width: 70%;">SMILES</th>
-                            <th style="width: 10%;">success</th>
-                            <th style="width: 20%;">error</th>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            `);
+            $("#div-info").html('<table id="table-info" class="table">' +
+                    '<thead>' +
+                        '<tr>' +
+                            '<th style="width: 70%;">SMILES</th>' +
+                            '<th style="width: 10%;">success</th>' +
+                            '<th style="width: 20%;">error</th>' +
+                    '</thead>' +
+                    '<tbody>' +
+                    '</tbody>' +
+                '</table>');
 
             $.each(result.data, function()
             {
@@ -213,31 +237,36 @@
                     var error = "";
                 }
 
-                $("#table-info tbody").append(`
-                    <tr class="{0}">
-                        <td style="text-align: left;">{1}</td>
-                        <td>{2}</td>
-                        <td>{3}</td>
-                    </tr>
-               `.format(tr_class, this.smiles, this.success, error));
+                $("#table-info tbody").append(('<tr class="{0}">' +
+                        '<td style="text-align: left;">{1}</td>' +
+                        '<td>{2}</td>' +
+                        '<td>{3}</td>' +
+                    '</tr>').format(tr_class, this.smiles, this.success, error));
             });
         }
 
+        $(window).on('resize', function()
+        {
+            sketcher.resize($("#panel-chemdoodle").outerWidth() - 50, sketcher_height);
+        });
+
         $("#button-add").click(function()
         {
-            toggleLoad(true);
-
             var molfile = ChemDoodle.writeMOL(sketcher.getMolecule());
 
             if (molfile != "")
             {
+                var button = $(this);
+                toggleLoad(true, "#div-info");
+                disableButtons(true);
+
                 $.ajax({
                     url: "/api/addMolecule",
                     method: "POST",
                     data: {molfile: ChemDoodle.writeMOL(sketcher.getMolecule())},
                     success: function(result)
                     {
-                        console.log(result);
+                        //console.log(result);
 
                         if (result.status == "success")
                         {
@@ -245,7 +274,7 @@
                         }
                         else
                         {
-                            $("#div-info").prepend("<div id='div-error'>" + result.message + "</div>");
+                            $("#div-info").prepend("<p class='text-warning'>" + result.message + "</p>");
                         }
                     },
                     error: function(result)
@@ -254,29 +283,22 @@
                     },
                     complete: function()
                     {
-                        toggleLoad(false);
+                        $("#button-smiles").trigger("click");
+                        toggleLoad(false, "#div-info");
+                        disableButtons(false);
                     }
-                    /*success: function(result)
-                    {
-                        if (result[0].smiles)
-                        {
-                            $("#input-smiles").val(result[0].smiles);
-                        }
-
-                        showUploadInfo();
-                    }*/
                 });
             }
             else
             {
                 $("#div-info").html("<p class='error'>Cannot add empty molecule!</p>");
             }
-
-            toggleLoad(false);
         });
 
         $("#button-smiles").click(function()
         {
+            var button = $(this);
+
             $.ajax({
                 url: "/api/molConverter",
                 method: "POST",
@@ -306,7 +328,8 @@
             }
 
             $("#div-info").empty();
-            toggleLoad(true);
+            toggleLoad(true, "#div-info");
+            disableButtons(true);
 
             var fd = new FormData();
             fd.append("file", $("#input-file")[0].files[0]);
@@ -329,7 +352,7 @@
                     }
                     else
                     {
-                        $("#div-info").prepend("<div id='div-error'>" + result.message + "</div>");
+                        $("#div-info").html("<p class='text-warning'>" + result.message + "</p>");
                     }
                 },
                 error: function(result)
@@ -338,7 +361,8 @@
                 },
                 complete: function()
                 {
-                    toggleLoad(false);
+                    toggleLoad(false, "#div-info");
+                    disableButtons(false);
                 }
             });
         });

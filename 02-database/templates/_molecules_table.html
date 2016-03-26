@@ -1,0 +1,139 @@
+{% block table %}
+    {% if mols %}
+        <div class="row">
+            <div class="col-sm-12 col-centered text-center">
+                <div id="div-table">
+                    <table id="table-mols">
+                        <thead>
+                            <tr class="mols">
+                                <th class="mols-select auto-width"><input id="input-select-all" type="checkbox" /></th>
+                                <th class="mols-id auto-width">ID</th>
+                                <th class="auto-width">Added</th>
+                                <th class="auto-width">Sum formula</th>
+                                <th class="break">SMILES</th>
+                                <th class="break">InChi</th>
+                                <th class="mols-image">Structure</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mol in mols %}
+                                <tr class="mols">
+                                    <td class="mols-select auto-width"><input type="checkbox" value="{{ mol.id }}" /></td>
+                                    <td class="mols-id auto-width">{{ mol.internal_id }}</td>
+                                    <td class="auto-width">{{ mol.created|date:"Y-m-d H:i" }}</td>
+                                    <td class="auto-width">{{ mol.sum_formula }}</td>
+                                    <td class="break">{{ mol.smiles }}</td>
+                                    <td class="break">{{ mol.inchi }}</td>
+                                    <td class="mols-image">
+                                        {{ mol.image|safe }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12 col-centered text-center">
+                <a id="a-download">Download SELECTED molecules as SDF</a> | <a id="a-download-all" view_type="{{ type }}">Download ALL molecules as SDF</a>
+            </div>
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-sm-12 col-centered text-center">
+                <h2 class="text-info">No matching molecules found in database.</h2>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        $('td.mols-select input[type="checkbox"]').change(function ()
+        {
+            var chb = $(this);
+            var tr = chb.parents("tr.mols");
+            var checked = chb.prop("checked");
+
+            if (checked)
+            {
+                tr.addClass("selected");
+            }
+            else
+            {
+                tr.removeClass("selected");
+            }
+        });
+
+        function downloadSdf(type)
+        {
+            if (type == "selected" || type == "search")
+            {
+                if (type == "selected")
+                {
+                    var el = "input:checked";
+                }
+                else if (type == "search")
+                {
+                    var el = "input";
+                }
+
+                var mol_ids = [];
+
+                $("#table-mols tbody").find(el).each(function()
+                {
+                    mol_ids.push($(this).val());
+                });
+
+                var url = "?mol_ids[]=" + mol_ids.join("&mol_ids[]=");
+
+                $.fileDownload("{% url 'api_downloadMolecules' %}" + url);
+            }
+            else if (type == "all")
+            {
+                $.fileDownload("{% url 'api_downloadMolecules' %}" + "?download_all=true");
+            }
+        }
+
+        $("#a-download").click(function()
+        {
+            downloadSdf("selected");
+        });
+
+        $("#a-download-all").click(function()
+        {
+            if ($(this).attr("view_type") == "search")
+            {
+                downloadSdf("search");
+            }
+            else if ($(this).attr("view_type") == "list")
+            {
+                downloadSdf("all");
+            }
+        });
+
+        $("#input-select-all").change(function()
+        {
+            var checked = $(this).prop("checked");
+
+            if (checked)
+            {
+                $("#table-mols tbody tr td.mols-select input").each(function()
+                {
+                    $(this).prop("checked", true);
+                    $(this).change();
+                });
+            }
+            else
+            {
+                $("#table-mols tbody tr td.mols-select input").each(function()
+                {
+                    $(this).prop("checked", false);
+                    $(this).change();
+                });
+            }
+        });
+    </script>
+{% endblock %}
