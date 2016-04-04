@@ -6,9 +6,9 @@
 
 {% block staticfiles %}
     {{ block.super }}
-    <script src="{% static "js/jquery.fileDownload.js" %}"></script>
+    <link href="{% static "css/_molecules_table.css" %}" rel="stylesheet" type="text/css">
 
-    <link href="{% static "css/list_molecules.css" %}" rel="stylesheet" type="text/css">
+    <script src="{% static "js/jquery.fileDownload.js" %}"></script>
 {% endblock %}
 
 {% block title %}List molecules{% endblock %}

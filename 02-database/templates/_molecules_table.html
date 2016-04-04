@@ -1,3 +1,5 @@
+{# TODO: tooltip with bigger image of molecule on hover #}
+
 {% block table %}
     {% if mols %}
         <div class="row">
@@ -6,7 +8,9 @@
                     <table id="table-mols">
                         <thead>
                             <tr class="mols">
-                                <th class="mols-select auto-width"><input id="input-select-all" type="checkbox" /></th>
+                                <th class="mols-select auto-width">
+                                    <input id="input-select-all" type="checkbox" class="input-checkbox-table" />
+                                </th>
                                 <th class="mols-id auto-width">ID</th>
                                 <th class="auto-width">Added</th>
                                 <th class="auto-width">Sum formula</th>
@@ -18,7 +22,9 @@
                         <tbody>
                             {% for mol in mols %}
                                 <tr class="mols">
-                                    <td class="mols-select auto-width"><input type="checkbox" value="{{ mol.id }}" /></td>
+                                    <td class="mols-select auto-width">
+                                        <input type="checkbox" value="{{ mol.id }}" class="input-checkbox-table" />
+                                    </td>
                                     <td class="mols-id auto-width">{{ mol.internal_id }}</td>
                                     <td class="auto-width">{{ mol.created|date:"Y-m-d H:i" }}</td>
                                     <td class="auto-width">{{ mol.sum_formula }}</td>
@@ -51,7 +57,7 @@
 
 {% block scripts %}
     <script>
-        $('td.mols-select input[type="checkbox"]').change(function ()
+        $('td.mols-select .input-checkbox-table').change(function ()
         {
             var chb = $(this);
             var tr = chb.parents("tr.mols");

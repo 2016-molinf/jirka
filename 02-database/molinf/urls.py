@@ -34,5 +34,6 @@ urlpatterns = [
     url(r'^api/uploadMolecules$', moldb.views.api_uploadMolecules, name='api_uploadMolecules'),
     url(r'^api/uploadMolecules/status$', moldb.views.api_uploadMoleculesStatus, name='api_uploadMoleculesStatus'),
     url(r'^api/downloadMolecules$', moldb.views.api_downloadMolecules, name='api_downloadMolecules'),
-    url(r'^api/searchMoleculesByStructure$', moldb.views.api_searchMoleculesByStructure, name='api_searchMoleculesByStructure')
+    url(r'^api/searchMoleculesByStructure$', moldb.views.api_searchMoleculesByStructure, name='api_searchMoleculesByStructure'),
+    url(r'^api/searchMoleculesByFilter$', moldb.views.api_searchMoleculesByFilter, name='api_searchMoleculesByFilter')
 ]

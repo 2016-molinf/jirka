@@ -1,3 +1,6 @@
+# TODO: depot web app, adding/removing amount of compounds, usage statistics etc.
+# TODO: IUPAC naming from Chemdoodle web or some Python module
+
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from moldb import models
@@ -16,6 +19,12 @@ import random
 from subprocess import Popen
 import time
 import logging
+from django.db.models import Q
+from django.db.utils import DataError
+from psycopg2 import DataError as DataError_psycopg2
+import operator
+from functools import reduce
+from django_rdkit.models import QMOL, Value
 
 logger = logging.getLogger(__name__)
 
@@ -186,16 +195,72 @@ def api_searchMoleculesByStructure(request):
                 mols_list = models.Molecule.objects.filter(rdmol__hassubstruct=Chem.MolToSmiles(mol))
 
             if request.POST["form"] == "table":
+                mols_count = len(mols_list)
+
                 return JsonResponseStatus("success", data={
                                                         "table": render_to_string(
                                                                     '_molecules_table.html',
-                                                                    context={"mols": mols_list, "all_mols_count": len(mols_list), "type": "search"},
+                                                                    context={"mols": mols_list, "all_mols_count": mols_count, "type": "search"},
                                                                     request=request),
-                                                        "mols_count": len(mols_list)})
+                                                        "mols_count": mols_count})
         else:
             raise models.Molecule.MoleculeCreationError
     except models.Molecule.MoleculeCreationError as e:
         return JsonResponseStatus("error", message=e.message)
+
+def api_searchMoleculesByFilter(request):
+    search_fields = ["rdmol", "sum_formula", "inchi", "inchi_key", "smarts", "mw", "mw__lt", "mw__gt"]
+    search_type = request.POST["search_type"]
+
+    fields = request.POST.getlist("fields[]")
+    values = request.POST.getlist("values[]")
+    unknown_fields = []
+    search_q = Q()
+
+    if fields and values:
+        if "smarts" in fields:
+            smarts_index = fields.index("smarts")
+            search_q = Q(rdmol__hassubstruct=QMOL(Value(values.pop(smarts_index))))
+            del fields[smarts_index]
+
+        for field in fields:
+            if field not in search_fields:
+                unknown_fields.append(field)
+
+            if unknown_fields:
+                return JsonResponseStatus("error",
+                                      message="Unknown search fields: {}. Allowed fields are {}".format(
+                                          ["'{}'".format(x) for x in unknown_fields],
+                                          ["'{}'".format(y) for y in search_fields]
+                                      ))
+
+        predicates = list(zip(fields, values))
+        q_list = [Q(x) for x in predicates]
+
+        if search_type == "or":
+            if fields and values:
+                search_q = search_q | reduce(operator.or_, q_list)
+        elif search_type == "and":
+            if fields and values:
+                search_q = search_q & reduce(operator.and_, q_list)
+
+        try:
+            mols_list = models.Molecule.objects.filter(search_q)
+            mols_count = len(mols_list)
+        except DataError_psycopg2 as e:
+            return JsonResponseStatus("error", message=str(e))
+        except DataError as e:
+            return JsonResponseStatus("error", message=str(e))
+
+        if request.POST["form"] == "table":
+            return JsonResponseStatus("success", data={
+                                                    "table": render_to_string(
+                                                                '_molecules_table.html',
+                                                                context={"mols": mols_list, "all_mols_count": mols_count, "type": "search"},
+                                                                request=request),
+                                                    "mols_count": mols_count})
+    else:
+        return JsonResponseStatus("error", message="No search fields supplied.")
 
 # helper functions
 

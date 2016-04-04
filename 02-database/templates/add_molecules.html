@@ -113,12 +113,12 @@
         {
             if (mode)
             {
-                $("#div-buttons #button-add").prop('disabled', true);
+                $("#button-add").prop('disabled', true);
                 $("#button-import").prop('disabled', true);
             }
             else
             {
-                $("#div-buttons #button-add").prop('disabled', false);
+                $("#button-add").prop('disabled', false);
                 $("#button-import").prop('disabled', false);
             }
         }
@@ -130,7 +130,7 @@
                 method: "GET",
                 success: function (result)
                 {
-                    console.log(result);
+                    //console.log(result);
 
                     $("#div-mol_number").text(result.mol_number);
 
@@ -344,7 +344,7 @@
                 contentType: false,
                 success: function(result)
                 {
-                    console.log(result);
+                    //console.log(result);
 
                     if (result.status == "success")
                     {

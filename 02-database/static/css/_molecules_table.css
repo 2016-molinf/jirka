@@ -49,7 +49,7 @@ tr.mols.selected {
     border-top: 1px solid black;
 }
 
-input[type="checkbox"] {
+.input-checkbox-table {
     -ms-transform: scale(2); /* IE */
     -moz-transform: scale(2); /* FF */
     -webkit-transform: scale(2); /* Safari and Chrome */

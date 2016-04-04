@@ -1,3 +1,3 @@
 #!/bin/bash
 
-/home/jirka/.conda/envs/molinf/bin/postgres -D /home/jirka/.conda/envs/molinf/database &
+/home/jirka/miniconda3/envs/molinf/bin/postgres -D /home/jirka/miniconda3/envs/molinf/database &
