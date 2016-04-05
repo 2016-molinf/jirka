@@ -163,7 +163,15 @@
     {{ block.super }}
 
     <script>
-        var sketcher = new ChemDoodle.SketcherCanvas('canvas-chemdoodle', 500, 300, {useServices: true, oneMolecule: true});
+        var sketcher_width = $("#panel-chemdoodle").outerWidth() - 50;
+        var sketcher_height = 300;
+
+        var sketcher = new ChemDoodle.SketcherCanvas('canvas-chemdoodle', sketcher_width, 300, {oneMolecule: true, isMobile: true});
+
+        $(window).on('resize', function()
+        {
+            sketcher.resize($("#panel-chemdoodle").outerWidth() - 50, sketcher_height);
+        });
 
         function disableButtons(mode)
         {
