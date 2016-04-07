@@ -14,6 +14,7 @@ tr.mols {
 tr.mols th {
     padding-bottom: 5px;
     padding-top: 5px;
+    text-align: center;
 }
 
 tr.mols td, th {

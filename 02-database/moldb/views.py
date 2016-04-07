@@ -25,6 +25,8 @@ from psycopg2 import DataError as DataError_psycopg2
 import operator
 from functools import reduce
 from django_rdkit.models import QMOL, Value
+from .settings import *
+from .search_paginator import SearchPaginator
 
 logger = logging.getLogger(__name__)
 
@@ -43,10 +45,25 @@ def add_molecules(request):
         {"form": AddMoleculeForm()})
 
 def list_molecules(request):
+    paginator = SearchPaginator(models.Molecule,
+                                models.Molecule.objects.all().values_list("id", flat=True),
+                                MOLECULES_PER_LIST_PAGE)
+
+    if "page" in request.GET.keys():
+        page = paginator.get_page(request.GET["page"])
+    else:
+        page = paginator.get_page(1)
+
+    return render(request,
+        'list_molecules.html',
+        {"mols": page, "all_mols_count": paginator.objects_count, "paginator": page, "type": "list"})
+
+"""
+def list_molecules(request):
     mols_list = models.Molecule.objects.all()
     paginator = Paginator(mols_list, 20)
 
-    page = request.GET.get('page')
+    page = request.GET.get('get_page')
     try:
         mols = paginator.page(page)
     except PageNotAnInteger:
@@ -57,6 +74,7 @@ def list_molecules(request):
     return render(request,
         'list_molecules.html',
         {"mols": mols, "all_mols_count": len(mols_list), "type": "list"})
+"""
 
 def search_molecules(request, *args, **kwargs):
     return render(request,
@@ -185,6 +203,39 @@ def api_downloadMolecules(request):
         return response
 
 def api_searchMoleculesByStructure(request):
+    if "search_paginators" not in request.session.keys():
+        request.session["search_paginators"] = []
+
+    if "page" in request.POST.keys():
+        return search_pagination(request, page=request.POST["page"], paginator_number=request.POST["paginator_number"])
+    else:
+        try:
+            mol = Chem.MolFromMolBlock(request.POST["molfile"])
+
+            if mol:
+                if request.POST["type"] == "exact":
+                    mols_list = models.Molecule.objects.filter(inchi=Chem.MolToInchi(mol))
+                elif request.POST["type"] == "substructure":
+                    mols_list = models.Molecule.objects.filter(rdmol__hassubstruct=Chem.MolToSmiles(mol))
+
+                paginator = SearchPaginator(models.Molecule,
+                                            mols_list.values_list("id", flat=True),
+                                            MOLECULES_PER_SEARCH_PAGE)
+                request.session["search_paginators"].append({
+                    "paginator": paginator,
+                    "query": mols_list.query
+                })
+
+                return search_pagination(request,
+                                         paginator=paginator,
+                                         paginator_number=len(request.session["search_paginators"]) - 1)
+            else:
+                raise models.Molecule.MoleculeCreationError
+        except models.Molecule.MoleculeCreationError as e:
+            return JsonResponseStatus("error", message=e.message)
+
+"""
+def api_searchMoleculesByStructure(request):
     try:
         mol = Chem.MolFromMolBlock(request.POST["molfile"])
 
@@ -207,7 +258,72 @@ def api_searchMoleculesByStructure(request):
             raise models.Molecule.MoleculeCreationError
     except models.Molecule.MoleculeCreationError as e:
         return JsonResponseStatus("error", message=e.message)
+"""
 
+def api_searchMoleculesByFilter(request):
+    if "search_paginators" not in request.session.keys():
+        request.session["search_paginators"] = []
+
+    if "page" in request.POST.keys():
+        return search_pagination(request, page=request.POST["page"], paginator_number=request.POST["paginator_number"])
+    else:
+        search_fields = ["rdmol", "sum_formula", "inchi", "inchi_key", "smarts", "mw", "mw__lt", "mw__gt"]
+        search_type = request.POST["search_type"]
+
+        fields = request.POST.getlist("fields[]")
+        values = request.POST.getlist("values[]")
+        unknown_fields = []
+        search_q = Q()
+
+        if fields and values:
+            if "smarts" in fields:
+                smarts_index = fields.index("smarts")
+                search_q = Q(rdmol__hassubstruct=QMOL(Value(values.pop(smarts_index))))
+                del fields[smarts_index]
+
+            for field in fields:
+                if field not in search_fields:
+                    unknown_fields.append(field)
+
+            if unknown_fields:
+                return JsonResponseStatus("error",
+                                      message="Unknown search fields: {}. Allowed fields are {}".format(
+                                          ["'{}'".format(x) for x in unknown_fields],
+                                          ["'{}'".format(y) for y in search_fields]
+                                      ))
+
+            predicates = list(zip(fields, values))
+            q_list = [Q(x) for x in predicates]
+
+            if search_type == "or":
+                if fields and values:
+                    search_q = search_q | reduce(operator.or_, q_list)
+            elif search_type == "and":
+                if fields and values:
+                    search_q = search_q & reduce(operator.and_, q_list)
+
+            try:
+                mols_list = models.Molecule.objects.filter(search_q)
+
+                paginator = SearchPaginator(models.Molecule,
+                                            mols_list.values_list("id", flat=True),
+                                            MOLECULES_PER_SEARCH_PAGE)
+                request.session["search_paginators"].append({
+                    "paginator": paginator,
+                    "query": mols_list.query
+                })
+
+                return search_pagination(request,
+                                         paginator=paginator,
+                                         paginator_number=len(request.session["search_paginators"]) - 1)
+            except DataError_psycopg2 as e:
+                return JsonResponseStatus("error", message=str(e))
+            except DataError as e:
+                return JsonResponseStatus("error", message=str(e))
+        else:
+            return JsonResponseStatus("error", message="No search fields supplied.")
+
+"""
 def api_searchMoleculesByFilter(request):
     search_fields = ["rdmol", "sum_formula", "inchi", "inchi_key", "smarts", "mw", "mw__lt", "mw__gt"]
     search_type = request.POST["search_type"]
@@ -245,7 +361,7 @@ def api_searchMoleculesByFilter(request):
                 search_q = search_q & reduce(operator.and_, q_list)
 
         try:
-            mols_list = models.Molecule.objects.filter(search_q)
+            mols_list = models.Molecule.__objects_list.filter(search_q)
             mols_count = len(mols_list)
         except DataError_psycopg2 as e:
             return JsonResponseStatus("error", message=str(e))
@@ -261,6 +377,7 @@ def api_searchMoleculesByFilter(request):
                                                     "mols_count": mols_count})
     else:
         return JsonResponseStatus("error", message="No search fields supplied.")
+"""
 
 # helper functions
 
@@ -298,3 +415,24 @@ def JsonResponseStatus(status, data=None, message=None):
         return JsonResponse({"status": "success", "data": data, "message": None})
     elif status == "error" and message is not None:
         return JsonResponse({"status": "error", "data": None, "message": message})
+
+def search_pagination(request, page=1, paginator=None, paginator_number=0):
+    paginator_number = int(paginator_number)
+
+    if not paginator:
+        paginator = request.session["search_paginators"][paginator_number]["paginator"]
+
+    try:
+        page = paginator.get_page(page)
+        return JsonResponseStatus("success", data={
+            "table": render_to_string(
+                '_molecules_table.html',
+                context={"mols": page.objects_list,
+                         "type": "search",
+                         "paginator": page,
+                         "paginator_number": paginator_number},
+                request=request),
+            "mols_count": paginator.objects_count,
+        })
+    except SearchPaginator.PageDoesNotExist:
+        return JsonResponseStatus("error", message="No molecules found in database.")

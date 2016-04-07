@@ -1,3 +1,5 @@
+# TODO: from SDF import also name of the molecule
+
 from django.core.exceptions import ObjectDoesNotExist
 from rdkit.Chem import AllChem
 from rdkit import Chem

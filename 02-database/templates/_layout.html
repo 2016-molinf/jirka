@@ -11,6 +11,7 @@
 
         {% block staticfiles %}
             <link href="{% static "css/_layout.css" %}" rel="stylesheet" type="text/css">
+            <link href="{% static "css/_paginator.css" %}" rel="stylesheet" type="text/css">
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
             <link rel="stylesheet" href="{% static "css/bootstrap/united.css" %}" />
             <link rel="stylesheet" href="{% static "css/bootstrap/select2-bootstrap.css" %}" />
@@ -77,19 +78,24 @@
             <script>
                 var csrftoken = getCookie('csrftoken');
 
-                function toggleLoad(mode, element)
+                function toggleLoad(mode, element, size)
                 {
                     if (mode)
                     {
-                        $(element).html("<div id='div-loader'><img src='{% static 'image/gear.gif' %}' alt='Loading...' /></div>");
-                        //$("#div-buttons #button-add").prop('disabled', true);
-                        //$("#button-import").prop('disabled', true);
+                        if (size == "small")
+                        {
+                            var src = "{% static 'image/gear_small.gif' %}";
+                        }
+                        else if (size == "normal")
+                        {
+                            var src = "{% static 'image/gear.gif' %}";
+                        }
+
+                        $(element).html("<div id='div-loader'><img src='" + src + "' alt='Loading...' /></div>");
                     }
                     else
                     {
                         $(element + " #div-loader").remove();
-                        //$("#div-buttons #button-add").prop('disabled', false);
-                        //$("#button-import").prop('disabled', false);
                     }
                 }
 
