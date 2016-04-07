@@ -105,9 +105,8 @@
         var sketcher_width = $("#panel-chemdoodle").outerWidth() - 50;
         var sketcher_height = 300;
 
-        //var sketcher = new ChemDoodle.SketcherCanvas('canvas-chemdoodle', 500, 300, {useServices: true, oneMolecule: true});
         var sketcher = new ChemDoodle.SketcherCanvas('canvas-chemdoodle', sketcher_width, 300, {oneMolecule: true, isMobile: true});
-        var uploadStatusInterval;
+        //var uploadStatusInterval;
 
         function disableButtons(mode)
         {
@@ -257,7 +256,7 @@
             if (molfile != "")
             {
                 var button = $(this);
-                toggleLoad(true, "#div-info");
+                toggleLoad(true, "#div-info", "normal");
                 disableButtons(true);
 
                 $.ajax({
@@ -328,7 +327,7 @@
             }
 
             $("#div-info").empty();
-            toggleLoad(true, "#div-info");
+            toggleLoad(true, "#div-info", "normal");
             disableButtons(true);
 
             var fd = new FormData();

@@ -17,52 +17,12 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm-12 col-centered text-center">
-                <h2>Add molecules</h2>
+                <h2>List molecules</h2>
             </div>
         </div>
 
         {% if mols %}
-            <div class="row">
-                <div class="col-sm-12 col-centered text-center">
-                    <div class="div-pagination">
-                        <span class="step-links">
-                            {% if mols.has_previous %}
-                                <a href="?page={{ mols.previous_page_number }}">previous</a>
-                            {% endif %}
-
-                            <span class="current">
-                                Page {{ mols.number }} of {{ mols.paginator.num_pages }}.
-                            </span>
-
-                            {% if mols.has_next %}
-                                <a href="?page={{ mols.next_page_number }}">next</a>
-                            {% endif %}
-                        </span>
-                    </div>
-                </div>
-            </div>
-
             {% include "_molecules_table.html" %}
-
-            <div class="row">
-                <div class="col-sm-12 col-centered text-center">
-                    <div class="div-pagination">
-                        <span class="step-links">
-                            {% if mols.has_previous %}
-                                <a href="?page={{ mols.previous_page_number }}">previous</a>
-                            {% endif %}
-
-                            <span class="current">
-                                Page {{ mols.number }} of {{ mols.paginator.num_pages }}.
-                            </span>
-
-                            {% if mols.has_next %}
-                                <a href="?page={{ mols.next_page_number }}">next</a>
-                            {% endif %}
-                        </span>
-                    </div>
-                </div>
-            </div>
 
             <div class="row">
                 <div class="col-sm-12 col-centered text-center">
@@ -135,20 +95,5 @@
                 });
             }
         });
-
-        /*$("td.mols-select").click(function() {
-            var td = $(this);
-            var chb = td.find("input[type='checkbox']")
-            var checked = chb.prop("checked");
-
-            if (checked)
-            {
-                chb.prop("checked", false);
-            }
-            else
-            {
-                chb.prop("checked", true);
-            }
-        });*/
     </script>
 {% endblock %}
