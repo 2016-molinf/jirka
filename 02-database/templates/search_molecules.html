@@ -1,6 +1,4 @@
 {# TODO: searching by summary formula: parse summary formula to atoms and then search this atoms separated, joined by AND #}
-{# TODO: check missing <div class="row"> on some col-md-12 etc. divs #}
-{# TODO: loading div outside results div #}
 
 {% extends '_layout.html' %}
 {% block search_active %}active{% endblock %}
@@ -80,6 +78,17 @@
                                 </div>
                                 <div class="col-sm-1">
                                     <input for_input="input-formula" type="checkbox" class="input-enable" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="input-name" class="col-sm-2 control-label">Name</label>
+                                <div class="col-sm-9">
+                                    <input id="input-name" field="name" class="form-control molecule-search-text"
+                                           type="text" disabled="disabled" />
+                                </div>
+                                <div class="col-sm-1">
+                                    <input for_input="input-name" type="checkbox" class="input-enable" />
                                 </div>
                             </div>
 
@@ -238,7 +247,7 @@
 
             if (molfile != "")
             {
-                getSearchResults("/api/searchMoleculesByStructure",
+                getSearchResults("{% url 'api_searchMoleculesByStructure' %}",
                                 {
                                     "molfile": ChemDoodle.writeMOL(sketcher.getMolecule()),
                                     "type": type
@@ -254,17 +263,16 @@
 
         function prepareFilterForSearch(type)
         {
-            data = {"fields": [], "values": []};
+            var data = {"fields": [], "values": []};
 
             $("input.molecule-search-text").each(function()
             {
-                input_el = $(this);
+                var input_el = $(this);
 
                 if ($("input[type='checkbox'][for_input='" + input_el.attr("id") + "']").is(":checked"))
                 {
-                    input_el = $(this);
                     input_text = input_el.val();
-                    field = input_el.attr("field");
+                    var field = input_el.attr("field");
 
                     if (input_text)
                     {
@@ -276,15 +284,15 @@
 
             if ($("input[type='checkbox'][for_input='input-mw']").is(":checked"))
             {
-                mw_val = $("#input-mw").val();
+                var mw_val = $("#input-mw").val();
 
                 if (mw_val != "" && mw_val.match(/^(\d*[.])?\d+$/))
                 {
-                    mw = parseFloat(mw_val);
+                    var mw = parseFloat(mw_val);
 
                     if (mw > 0)
                     {
-                        mw_type = $("#select-mw option:selected").val();
+                        var mw_type = $("#select-mw option:selected").val();
 
                         if (mw_type)
                         {
@@ -312,7 +320,7 @@
             else
             {
                 data["search_type"] = type;
-                getSearchResults("/api/searchMoleculesByFilter", data, true);
+                getSearchResults("{% url 'api_searchMoleculesByFilter' %}", data, true);
             }
         }
 
@@ -353,7 +361,7 @@
             e.preventDefault();
             e.stopPropagation();
             toggleLoad(true, ".div-paginator", "small");
-            getSearchResults("/api/searchMoleculesByFilter",
+            getSearchResults("{% url 'api_searchMoleculesByFilter' %}",
                             data={
                                 "page": $(this).attr("page"),
                                 "paginator_number": $(this).attr("paginator_number")

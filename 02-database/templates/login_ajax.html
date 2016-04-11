@@ -1,0 +1,80 @@
+{% extends '_layout.html' %}
+
+{% block title %}Log In{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12 col-centered text-center col-heading">
+                <h2>Login</h2>
+            </div>
+        </div>
+
+        <div id="login">
+            <form class="form-horizontal" name="LoginForm" action="{% url 'login' %}">
+                {% if next %}
+                    <input id="input-redirect" type="hidden" name="next" value="{{ next }}" />
+                {% endif %}
+
+                <div class="control-group">
+                    <label class="control-label" for="username">Username</label>
+                    <div class="controls">
+                        <input type="text" id="input-username" placeholder="Username">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="password">Password</label>
+                    <div class="controls">
+                        <input type="password" id="input-password" placeholder="Password">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="controls">
+                        <button id="button-submit" type="button" class="btn">Login</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+
+    <script>
+        $("#button-submit").click(function()
+        {
+           $.ajax({
+                url: {% url 'login_ajax' %},
+                method: "POST",
+                data: {
+                    "username": $("#input-username").val(),
+                    "password": $("#input-password").val()
+                },
+                success: function(result)
+                {
+                    console.log(result);
+
+                    if (result.status == "success")
+                    {
+                        window.location = "/";
+                    }
+                    else
+                    {
+
+                    }
+                },
+                error: function(result)
+                {
+
+                },
+                complete: function()
+                {
+
+                }
+            });
+        });
+    </script>
+{% endblock %}

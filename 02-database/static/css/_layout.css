@@ -63,3 +63,25 @@ th {
     margin-top: 20px;
     text-align: center;
 }
+
+.navbar-brand {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    top: 0;
+    text-align: center;
+    margin: auto;
+}
+
+.navbar-toggle {
+    z-index:3;
+}
+
+.navbar-right {
+    margin-right: 10px;
+    padding-right: 10px;
+}
+
+nav a {
+    border: 0px;
+}

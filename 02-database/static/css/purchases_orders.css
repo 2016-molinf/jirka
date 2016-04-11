@@ -1,4 +1,4 @@
-#table-mols {
+table {
     overflow: hidden;
     table-layout: fixed;
     margin: 0 auto;
@@ -21,6 +21,7 @@ tr.mols td, th {
     padding-left: 10px;
     padding-right: 10px;
     border-left: 1px dotted black;
+    text-align: center;
 }
 
 tbody {
@@ -47,19 +48,6 @@ tr.mols.selected {
     background-color: #80e4ff;
 }
 
-.div-pagination {
-    margin-bottom: 10px;
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid black;
-}
-
-.input-checkbox-table {
-    -ms-transform: scale(2); /* IE */
-    -moz-transform: scale(2); /* FF */
-    -webkit-transform: scale(2); /* Safari and Chrome */
-    -o-transform: scale(2); /* Opera */
-}
 
 #div-table {
     padding-right: 1%;

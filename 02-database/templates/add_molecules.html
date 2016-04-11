@@ -1,6 +1,3 @@
-{# TODO: add CSS for add or import error ('Invalid file supplied.' etc.) #}
-{# TODO: write import error to the import panel #}
-
 {% extends '_layout.html' %}
 {% block add_active %}active{% endblock %}
 {% load staticfiles %}
@@ -35,7 +32,9 @@
                     <div class="panel-body">
                         <canvas id="canvas-chemdoodle"></canvas>
 
-                        <input id="input-smiles" type="text" class="form-control" readonly="readonly" style="width: 100%;" />
+                        <input id="input-smiles" type="text" class="form-control" placeholder="SMILES" readonly="readonly" style="width: 100%;" />
+
+                        <input id="input-name" type="text" class="form-control" placeholder="Name"/>
 
                         <div class="input-group col-centered">
                             <button id="button-add" type="submit" class="btn btn-primary">Add</button>
@@ -260,9 +259,12 @@
                 disableButtons(true);
 
                 $.ajax({
-                    url: "/api/addMolecule",
+                    url: "{% url 'api_addMolecule' %}",
                     method: "POST",
-                    data: {molfile: ChemDoodle.writeMOL(sketcher.getMolecule())},
+                    data: {
+                        "molfile": ChemDoodle.writeMOL(sketcher.getMolecule()),
+                        "name": $("#input-name").val()
+                    },
                     success: function(result)
                     {
                         //console.log(result);
@@ -299,7 +301,7 @@
             var button = $(this);
 
             $.ajax({
-                url: "/api/molConverter",
+                url: "{% url 'api_molConverter' %}",
                 method: "POST",
                 data: {data: ChemDoodle.writeMOL(sketcher.getMolecule()), format_from: "molfile", format_to: "smiles"},
                 success: function(result)
@@ -335,8 +337,8 @@
             fd.append("filetype", $(this).find("option:selected").val());
 
             $.ajax({
-                url: '/api/uploadMolecules',
-                type: 'POST',
+                url: "{% url 'api_uploadMolecules' %}",
+                type: "POST",
                 data: fd,
                 cache: false,
                 processData: false,
